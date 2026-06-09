@@ -1,0 +1,2816 @@
+include("_PBOC_CONF.js");
+
+
+
+function select_PBOC()
+{
+	print('\n*******************************************');
+	print('* Select PBOC');
+	print('*******************************************');
+	response = select(pboc_aid);
+    	
+	if(response == '6283') {
+		return response;
+	}
+	
+	if(response == '6283') {
+		return response;
+	}
+	
+	//if(response.substring(0,2) == '61') {
+		//response = send('00c00000'+response.substring(2,4));
+	//}
+	
+	//Get Template Value
+	var value_6F = lookup_BER_TLV(response, "6F", RETURN_VALUE);
+	var value_A5 = lookup_BER_TLV(value_6F, "A5", RETURN_VALUE);;
+	var value_BF0C = lookup_BER_TLV(value_A5, "BF0C", RETURN_VALUE);;
+	
+	print("\n-- FCI Interpretation : " + response);
+		
+	print("\n Tag 6F : FCI Template, Len : " + lookup_BER_TLV(response, "6F", RETURN_LENGTH) + ", Value : " + value_6F);
+	
+	print("    Tag 84 : DF Name, Len : " + lookup_BER_TLV(value_6F, "84", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(value_6F, "84", RETURN_VALUE));
+	print("    Tag A5 : FCI Proprietary Template, Len : " + lookup_BER_TLV(value_6F, "A5", RETURN_LENGTH) + ", Value : " + value_A5);
+	
+	print("       Tag 50 : Application Label, Len : " + lookup_BER_TLV(value_A5, "50", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(value_A5, "50", RETURN_VALUE));
+	print("       Tag 87 : Application Priority Indicator, Len : " + lookup_BER_TLV(value_A5, "87", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(value_A5, "87", RETURN_VALUE));
+	PDOL = lookup_BER_TLV(value_A5, "9F38", RETURN_VALUE);
+	print("       Tag 9F38 : PDOL, Len : " + lookup_BER_TLV(value_A5, "9F38", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(value_A5, "9F38", RETURN_VALUE));
+	print("       Tag 5F2D : Language Preference, Len : " + lookup_BER_TLV(value_A5, "5F2D", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(value_A5, "5F2D", RETURN_VALUE));
+	print("       Tag 9F11 : Issuer Code Table Index, Len : " + lookup_BER_TLV(value_A5, "9F11", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(value_A5, "9F11", RETURN_VALUE));
+	print("       Tag 9F12 : Application Preferred Name, Len : " + lookup_BER_TLV(value_A5, "9F12", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(value_A5, "9F12", RETURN_VALUE));
+	print("       Tag BF0C : FCI Issuer Discretionary Data, Len : " + lookup_BER_TLV(value_A5, "BF0C", RETURN_LENGTH) + ", Value : " + value_BF0C);
+	
+	LogEntry = lookup_BER_TLV(value_BF0C, "9F4D", RETURN_VALUE);
+	Log_SFI = LogEntry.substring(0, 2); //SFI of Log File
+	Log_RecNum = LogEntry.substring(2, 4); //Records Number of Log File	
+	print("          Tag 9F4D : Log Entry, Len : " + lookup_BER_TLV(value_BF0C, "9F4D", RETURN_LENGTH) + ", Value : " + LogEntry);
+
+	if(lookup_BER_TL(PDOL, "9F03", RETURN_LENGTH) != "") CVN = '01';
+	else CVN = '11';
+	
+	return response;
+}
+
+function select_PPSE()
+{
+	print('\n*******************************************');
+	print('* Select PPSE');
+	print('*******************************************');
+	response = select(ppse_aid);
+	//response = select("325041592E5359532E4444463031");
+	/*
+	if(response == '6283') {
+		return response;
+	}
+	
+	//Get Template Value
+	var value_6F = lookup_BER_TLV(response, "6F", RETURN_VALUE);
+	var value_A5 = lookup_BER_TLV(value_6F, "A5", RETURN_VALUE);
+	var value_BF0C = lookup_BER_TLV(value_A5, "BF0C", RETURN_VALUE);
+	
+	
+	print("\n-- FCI Interpretation : " + response);
+		
+	print("\n Tag 6F : FCI Template, Len : " + lookup_BER_TLV(response, "6F", RETURN_LENGTH) + ", Value : " + value_6F);
+	
+	print("    Tag 84 : DF Name, Len : " + lookup_BER_TLV(value_6F, "84", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(value_6F, "84", RETURN_VALUE));
+	print("    Tag A5 : FCI Proprietary Template, Len : " + lookup_BER_TLV(value_6F, "A5", RETURN_LENGTH) + ", Value : " + value_A5);
+	
+	print("       Tag BF0C : FCI Issuer Discretionary Data, Len : " + lookup_BER_TLV(value_A5, "BF0C", RETURN_LENGTH) + ", Value : " + value_BF0C);
+	while(value_BF0C.length > 0){
+		value_61 = lookup_BER_TLV(value_BF0C, "61", RETURN_VALUE);
+		print("         Tag 61 : Directory Entry, Len : " + lookup_BER_TLV(value_BF0C, "61", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(value_BF0C, "61", RETURN_VALUE));
+		print("           Tag 4F : DF Name (AID), Len : " + lookup_BER_TLV(value_61, "4F", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(value_61, "4F", RETURN_VALUE));
+		print("           Tag 50 : Application Label, Len : " + lookup_BER_TLV(value_61, "50", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(value_61, "50", RETURN_VALUE));
+		print("           Tag 87 : Application Priority Indicator, Len : " + lookup_BER_TLV(value_61, "87", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(value_61, "87", RETURN_VALUE));
+		value_BF0C = skip_Current_BER_TLV(value_BF0C);
+	}
+
+	
+	*/
+	
+	return response;
+}
+
+function assertSW(SW) {
+	assertSW(SW);
+}
+
+function check_ValidATC()
+{
+	if(ATC == "")
+		ATC = "FFFF";
+}
+
+function check_ValidAC()
+{
+	if(AC == "")
+		AC = "0000000000000000";
+}
+
+function calc_ARPC(ARC)
+{
+	check_ValidAC();		
+	check_ValidATC();
+	d1 = xor(AC, ARC + '000000000000');
+	sessionDEA_A = tdes_cbc("000000000000" + ATC, uniqueDEA_A + uniqueDEA_B);
+	sessionDEA_B = tdes_cbc("000000000000" + xor(ATC, "FFFF"), uniqueDEA_A + uniqueDEA_B);
+	ARPC = tdes_cbc(d1, sessionDEA_A + sessionDEA_B);
+	print("Initial data block : " + d1);
+	print("ARPC : " + ARPC);
+	return ARPC;
+}
+
+//currentPIN이 null이면 newPIN으로만 enciphered delta PIN block을 계산한다.
+function send_PinChange(currentPIN, newPIN)
+{
+	if (newPIN == null) {
+		error('ERROR : send_PinChange - newPIN shall not be null');
+	}
+	
+	encDeltaPIN = build_encDeltaPIN(currentPIN, newPIN);
+	mac = calc_MAC_PCU(currentPIN != null ? '01' : '02', encDeltaPIN);
+	response = send('842400' + (currentPIN != null ? '01' : '02') + '14' + encDeltaPIN + mac.substring(0,8));
+	
+	return response;
+	
+}
+
+//currentPIN이 null이면 newPIN으로만 enciphered delta PIN block을 계산한다.
+function build_encDeltaPIN(currentPIN, newPIN)
+{
+	check_ValidAC();		
+	check_ValidATC();
+	if (newPIN == null) {
+		error('ERROR : build_encDeltaPIN - newPIN shall not be null');
+	}	
+	
+	sessionDEAKey = get_sessionKey(uniqueENC_A, uniqueENC_B);
+	D1 = '00000000' + uniqueENC_A.substring(8, 16);
+	print('D1 : ' + D1);
+	D2 = '0' + newPIN.length.toString() + newPIN;
+	D2 = D2 + Fs.substring(0, 16 - D2.length);
+	print('D2 : ' + D2);
+	D3 = xor(D1, D2);
+	print('D3 : ' + D3);
+	if (currentPIN != null) {
+		currentPIN = currentPIN + zeros.substring(0, 16 - currentPIN.length);
+		print('current PIN : ' + currentPIN);
+		deltaPIN =  xor(D3, currentPIN);
+	} 
+	else {
+		deltaPIN = D3;
+	}
+	print('delta PIN : ' + deltaPIN);
+	srcBlock = '08' + deltaPIN + '80000000000000';
+	print('Source block : ' + srcBlock);
+	encDeltaPIN = tdes_ecb(srcBlock, sessionDEAKey);
+	print('Enciphered Delta PIN : ' + encDeltaPIN);
+	
+	return encDeltaPIN;
+}
+
+function calc_MAC_PCU(P2, cdata)
+{
+	check_ValidAC();	
+	check_ValidATC();
+	if (P2 == null) {
+		error('ERROR : calc_MAC_PCU - P2 shall not be null');
+	}
+	
+	sessionMACKey = get_sessionKey(uniqueMAC_A, uniqueMAC_B);
+	macSource = '842400' + P2 + '14' + ATC + AC + cdata + '80';
+	mac = ftdesMAC(macSource, sessionMACKey);
+
+	print("MAC Source : " + macSource);
+	print("MAC : " + mac);
+	
+	return mac; 
+}
+
+function calc_MAC_ABK()
+{
+	check_ValidAC();	
+	check_ValidATC();
+	sessionMACKey = get_sessionKey(uniqueMAC_A, uniqueMAC_B);
+	macSource = "841E000004" + ATC + AC + '80';
+	mac = ftdesMAC(macSource, sessionMACKey, ARPC);
+
+	print("MAC Source : " + macSource);
+	print("MAC : " + mac);
+	
+	return mac; 
+}
+
+function calc_MAC_CBK()
+{
+	check_ValidAC();	
+	check_ValidATC();
+	sessionMACKey = get_sessionKey(uniqueMAC_A, uniqueMAC_B);
+	macSource = "8416000004" + ATC + AC + '80';
+	mac = ftdesMAC(macSource, sessionMACKey, ARPC);
+
+	print("MAC Source : " + macSource);
+	print("MAC : " + mac);
+	
+	return mac; 
+}
+
+function calc_MAC_forDUS(tag, value)
+{
+	check_ValidAC();	
+	check_ValidATC();
+	sessionMAC_A = tdes_cbc("000000000000" + ATC, uniqueMAC_A + uniqueMAC_B);
+	sessionMAC_B = tdes_cbc("000000000000" + xor(ATC, "FFFF"), uniqueMAC_A + uniqueMAC_B);
+	//macSource = "04DA" + tag + toHex(value.length / 2 + 4) + ATC + AC + '80';
+	macSource = "04DA" + tag + toHex(value.length / 2 + 4) + ATC + AC + value;
+	if(get_ByteLength(macSource) % 8 == 0)
+		macSource = macSource + PADDING;
+	else
+		macSource = macSource + PADDING.substring(0, (8 - get_ByteLength(macSource) % 8) * 2);
+	
+	mac = ftdesMAC(macSource, sessionMAC_A + sessionMAC_B, ARPC);
+	
+	print("Session MAC Key : " + sessionMAC_A + sessionMAC_B);
+	print("MAC Source : " + macSource);
+	print("MAC : " + mac);
+	
+	return mac;
+}
+
+function calc_MAC_AUBK()
+{
+	check_ValidAC();	
+	check_ValidATC();
+	sessionMACKey = get_sessionKey(uniqueMAC_A, uniqueMAC_B);
+	
+	macSource = "8418000004" + ATC + AC + '80';
+	mac = ftdesMAC(macSource, sessionMACKey, ARPC);
+
+	print("MAC Source : " + macSource);
+	print("MAC : " + mac);
+	
+	return mac; 
+}
+
+function calc_MAC_PIN(P2)
+{
+	check_ValidAC();	
+	check_ValidATC();
+	sessionMACKey = get_sessionKey(uniqueMAC_A, uniqueMAC_B);
+	
+	macSource = "842400" + toHex(P2) + "04" + ATC + AC + '80';
+	mac = ftdesMAC(macSource, sessionMACKey, ARPC);
+
+	print("MAC Source : " + macSource);
+	print("MAC : " + mac);
+	
+	return mac;
+}
+
+function make_PDOL_Data(cdata){
+	var data = cdata;
+	if(cdata == '01'){
+		data = Terminal_Transaction_Qualifiers + Amount_Authorised + Amount_Other + Terminal_Country_Code + TVR + Transaction_Currency_Code + Transaction_Date + Transaction_Type + Unpredictable_Number;
+		data = '83' + toHex(data.length/2) + data;
+	}
+	else if(cdata == '11'){
+		if(PDOL.length == 24)
+			data = Terminal_Transaction_Qualifiers + Amount_Authorised + Unpredictable_Number + Transaction_Currency_Code;
+		else if(PDOL.length == 18)
+			data = Terminal_Transaction_Qualifiers + Amount_Authorised + Unpredictable_Number;
+		data = '83' + toHex(data.length/2) + data;
+	}
+	return data;
+	
+}
+function send_GPO(cdata)
+{
+	print('\n*******************************************');
+	print('* Get Processing Option');
+	print('*******************************************');
+	//return send('80A8000004'  83020840 00');
+	
+	TTQ_BYTE1 = parseInt(Terminal_Transaction_Qualifiers.substring(0,2), 16);
+	if((TTQ_BYTE1 & BIT_MASK_6) == BIT_MASK_6 || (TTQ_BYTE1 & BIT_MASK_8) == BIT_MASK_8){
+		is_qPBOC = true;
+		PDOL_Data = make_PDOL_Data(cdata);
+	} else {
+		PDOL_Data = cdata; 
+	}
+	
+	response = send('80A80000' + toHex(PDOL_Data.length/2) + PDOL_Data + '00');
+	
+//	print('\n*************************************************');
+//	print("* Get Processing Option Response Data Interpretation : -");
+//	print('*************************************************');
+
+	if(response.substr(0, 2) == "80"){
+		AIP = response.substring(4,8);
+		AFL = response.substring(8);
+	} else {
+		data = lookup_BER_TLV(response, "77", RETURN_VALUE);
+
+		AIP = lookup_BER_TLV(data, "82", RETURN_VALUE);
+
+		AFL = lookup_BER_TLV(data, "94", RETURN_VALUE);
+		ATC = lookup_BER_TLV(data, "9F36", RETURN_VALUE);
+		Track2_Equivalent_Data = lookup_BER_TLV(data, "57", RETURN_VALUE);
+		Issuer_Application_Data =  lookup_BER_TLV(data, "9F10", RETURN_VALUE);
+		if(Issuer_Application_Data != "")parse_IAD(Issuer_Application_Data);	
+		AC  = lookup_BER_TLV(data, "9F26", RETURN_VALUE);
+
+		reponse = lookup_BER_TLV(response, "77", RETURN_VALUE);
+
+		print('\n-- mandatory data elements');
+		print("    Tag 82 : AIP, Len : " + lookup_BER_TLV(response, "82", RETURN_LENGTH) + ", Value : " + AIP);
+		print("    Tag 9F36 : ATC, Len : " + lookup_BER_TLV(response, "9F36", RETURN_LENGTH) + ", Value : " + ATC);
+		print("    Tag 57 : Track 2 Equivalent Data, Len : " + lookup_BER_TLV(response, "57", RETURN_LENGTH) + ", Value : " + Track2_Equivalent_Data);
+		print("    Tag 9F10 : Issuer Application Data, Len : " + lookup_BER_TLV(response, "9F10", RETURN_LENGTH) + ", Value : " + Issuer_Application_Data);
+		print("    Tag 9F26 : Application Cryptogram, Len : " + lookup_BER_TLV(response, "9F26", RETURN_LENGTH) + ", Value : " + AC);
+
+		print('\n-- conditional data elements');
+		print("    Tag 5F34 : Application PAN Sequence Number, Len : " + lookup_BER_TLV(response, "5F34", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(response, "5F34", RETURN_VALUE));
+		print("    Tag 9F6C : Card Transaction Qualifier, Len : " + lookup_BER_TLV(response, "9F6C", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(response, "9F6C", RETURN_VALUE));
+		print("    Tag 9F5D : Available Offline Spending Amount, Len : " + lookup_BER_TLV(response, "9F5D", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(response, "9F5D", RETURN_VALUE));
+
+		print('\n-- optional data element');
+		print("    Tag 5F20 : Cardholder Name, Len : " + lookup_BER_TLV(response, "5F20", RETURN_LENGTH) + ", Value : " + lookup_BER_TLV(response, "5F20", RETURN_VALUE));
+
+	}
+	
+	print("\n-- AIP Interpretation : " + AIP);
+	var AIP_BYTE1 = parseInt(AIP.substring(0,2), 16);
+	var AIP_BYTE2 = parseInt(AIP.substring(2,4), 16);
+	
+	if( (AIP_BYTE1 & BIT_MASK_8) == BIT_MASK_8)
+		print(" Byte 1 Bit 8 = Initiate(not Supported)");
+	if( (AIP_BYTE1 & BIT_MASK_7) == BIT_MASK_7)
+		print(" Byte 1 Bit 7 = Offline static data authentication is supported");
+	if( (AIP_BYTE1 & BIT_MASK_6) == BIT_MASK_6)
+		print(" Byte 1 Bit 6 = Standard offline dynamic data authentication is supported");
+	if( (AIP_BYTE1 & BIT_MASK_5) == BIT_MASK_5)
+		print(" Byte 1 Bit 5 = Cardholder verification is supported");
+	if( (AIP_BYTE1 & BIT_MASK_4) == BIT_MASK_4)
+		print(" Byte 1 Bit 4 = Terminal Risk Management is to be performed");
+	if( (AIP_BYTE1 & BIT_MASK_3) == BIT_MASK_3)
+		print(" Byte 1 Bit 3 = Issuer Authentication is supported");
+	if( (AIP_BYTE1 & BIT_MASK_2) == BIT_MASK_2)
+		print(" Byte 1 Bit 2 = Combined DDA/AC generation is supported");
+	if( (AIP_BYTE1 & BIT_MASK_1) == BIT_MASK_1)
+		print(" Byte 1 Bit 1 = RFU(0)");
+	
+	print("\n-- AFL Interpretation : " + AFL);
+	var AFL_TEMP = AFL;
+	while(AFL_TEMP.length > 0) {
+		print(" SFI : " + (parseInt(AFL_TEMP.substring(0,2), 16) >> 3));
+		print(" First Record Number: " + AFL_TEMP.substring(2,4));
+		print(" Last Record Number: " + AFL_TEMP.substring(4,6));
+		print(" Number of records involved in static data authentication : " + AFL_TEMP.substring(6,8));
+		
+		AFL_TEMP = AFL_TEMP.substring(8);
+	}
+	
+	return response;
+}
+
+
+function send_GetData(tag)
+{
+	print('\n*******************************************');
+	print("* Get Data tag " + tag);
+	print('*******************************************');
+	return send_Command_CorrectedLe("80 CA" + tag + "00");
+}
+function send_GetChallenge()
+{
+	print('\n*******************************************');
+	print('* Get Challenge');
+	print('*******************************************');
+	
+	response = send_Command_CorrectedLe("0084000000");
+	cardRandomNumber = response.substring(0, 16);
+	
+	return response;
+	
+}
+
+function send_ReadRecord(SFI, recordNumber)
+{
+	print('\n*******************************************');
+	print('* Read Record');
+	print('*******************************************');
+	
+	var p1 = toHex(recordNumber);
+	var p2 = toHex( SFI << 3 | 0x04);
+	response = send_Command_CorrectedLe('00 B2' + p1 + p2 + '00');
+	
+	return response; 
+}
+
+
+function send_UpdateRecord(SFI, recordNumber, value)
+{
+	print('\n*******************************************');
+	print('* Update Record');
+	print('*******************************************');
+	
+	var p1 = toHex(recordNumber);
+	var p2 = toHex( SFI << 3 | 0x04);
+	
+  var mac = calc_MAC_forUPdateRecord(p1+p2, value);
+	response = send_Command_CorrectedLe('04 DC' + p1 + p2 + toHex(value.length / 2 + 4) + value + mac.substring(0, 8));
+	
+	return response; 
+}
+
+function send_UpdateRecord_invaild(SFI, recordNumber, value)
+{
+	print('\n*******************************************');
+	print('* Update Record with Invalid MAC');
+	print('*******************************************');
+	
+	var p1 = toHex(recordNumber);
+	var p2 = toHex( SFI << 3 | 0x04);
+	
+  var mac = calc_MAC_forUPdateRecord(p1+p2, value);
+	response = send_Command_CorrectedLe('04DC' + p1 + p2 + toHex(value.length / 2 + 4) + value +"11223344");
+	
+	return response; 
+}
+
+function send_UpdateRecord_noMAC(tag, value)
+{
+	print('\n*******************************************');
+	print("*Update Record without MAC : tag " + tag + ", value " + value);
+	print('*******************************************');
+	return send("04DC" + tag + toHex(value.length / 2) + value);
+
+}
+
+
+function calc_MAC_forUPdateRecord(tag, value)
+{
+	check_ValidAC();	
+	check_ValidATC();
+	sessionMAC_A = tdes_cbc("000000000000" + ATC, uniqueMAC_A + uniqueMAC_B);
+	sessionMAC_B = tdes_cbc("000000000000" + xor(ATC, "FFFF"), uniqueMAC_A + uniqueMAC_B);
+	//macSource = "04DA" + tag + toHex(value.length / 2 + 4) + ATC + AC + '80';
+	macSource = "04DC" + tag + toHex(value.length / 2 + 4) + ATC + AC + value;
+	if(get_ByteLength(macSource) % 8 == 0)
+		macSource = macSource + PADDING;
+	else
+		macSource = macSource + PADDING.substring(0, (8 - get_ByteLength(macSource) % 8) * 2);
+	
+	mac = ftdesMAC(macSource, sessionMAC_A + sessionMAC_B, ARPC);
+	
+	print("Session MAC Key : " + sessionMAC_A + sessionMAC_B);
+	print("MAC Source : " + macSource);
+	print("MAC : " + mac);
+	
+	return mac;
+}
+
+function send_PutData(tag, value)
+{
+	print('\n*******************************************');
+	print("* Put Data : tag " + tag + ", value " + value);
+	print('*******************************************');
+	var mac = calc_MAC_forDUS(tag, value);
+	return send("04DA" + tag + toHex(value.length / 2 + 4) + value + mac.substring(0, 8));
+}
+
+function send_PutData_Invalid(tag, value)
+{
+	print('\n*******************************************');
+	print("* Put Data with Invalid MAC : tag " + tag + ", value " + value);
+	print('*******************************************');
+	return send("04DA" + tag + toHex(value.length / 2 + 4) + value + "11223344");
+}
+
+function send_PutData_noMAC(tag, value)
+{
+	print('\n*******************************************');
+	print("* Put Data with Invalid MAC : tag " + tag + ", value " + value);
+	print('*******************************************');
+	return send("04DA" + tag + toHex(value.length / 2) + value);
+
+}
+
+function send_Verify(p2, cdata)
+{
+	return send_Verify_withOption(p2, cdata, NO_OPTION);
+}
+
+function send_Verify_InvalidPinBlockHeader(p2, cdata)
+{
+	return send_Verify_withOption(p2, cdata, INVALID_PIN_BLOCK_HEADER);
+}
+
+function send_Verify_InvalidKeyLength(p2, cdata)
+{
+	print("\n******************************************************");
+	print('* Verify with Enciphered PIN');
+	print("******************************************************");
+	return  send("00200088157F" + cdata + "1122334455667788FFFFFFFF");
+}
+
+function send_Verify_withOption(p2, cdata, Option)
+{
+	var issuer_PK_Modulus;
+	var ICC_PIN_Encipherment_PK;
+	var block;
+	var recordData;
+	var ICC_PIN_Encipherment_PK_Exponent;
+	var ICC_PIN_Encipherment_PK_Modulus;
+	var encipheredBlock;
+	
+	if(p2 == "80")
+	{
+		print("\n******************************************************");
+		print('* Verify with Plain Text');
+		print("******************************************************");
+
+		return send('002000' + p2 + '08' + cdata);
+	}
+	else if(p2 == "88")
+	{
+		print("\n******************************************************");
+		print('* Verify with Enciphered PIN');
+		print("******************************************************");
+
+		issuer_PK_Modulus = retrieve_Issuer_PK_Modulus(CA_PK_Modulus, CA_PK_Exponent);
+	
+		recordData = lookup_BER_TLV(send_ReadRecord(2,7), "70", RETURN_VALUE);
+		var ICC_PIN_Certificate = lookup_BER_TLV(recordData, "9F2D", RETURN_VALUE);
+		
+		//ICC PIN Certificate가 없는 경우 ICC PK Modulus, Exponent를 사용
+		if(ICC_PIN_Certificate == "")
+		{
+			recordData = lookup_BER_TLV(send_ReadRecord(2,5), "70", RETURN_VALUE);
+			ICC_PIN_Encipherment_PK_Exponent = lookup_BER_TLV(recordData, "9F47", RETURN_VALUE);
+			ICC_PIN_Encipherment_PK_Modulus = retrieve_ICC_PK_Modulus(issuer_PK_Modulus);
+		}
+		else
+		{
+			recordData = lookup_BER_TLV(send_ReadRecord(2,8), "70", RETURN_VALUE);
+		  ICC_PIN_Encipherment_PK_Exponent = lookup_BER_TLV(recordData, "9F2E", RETURN_VALUE);
+		  ICC_PIN_Encipherment_PK_Modulus = retrieve_ICC_PIN_Encipherment_PK_Modulus(issuer_PK_Modulus);
+		}
+		
+		block = bulid_PinBlock(cdata, cardRandomNumber, ICC_PIN_Encipherment_PK_Modulus, Option);
+		encipheredBlock = encRSAwithPublicKey(block ,ICC_PIN_Encipherment_PK_Modulus, ICC_PIN_Encipherment_PK_Exponent);
+		
+
+		print("\n* ICC PIN Encipherment Public Key Modulus : " + ICC_PIN_Encipherment_PK_Modulus);
+		print("* ICC PIN Encipherment Public Key Exponent : " + ICC_PIN_Encipherment_PK_Exponent);
+		
+		print("* PIN block to be enciphered : " + block);
+		print("* Enciphered PIN block : " + encipheredBlock);
+		
+		return send('002000' + p2 + toHex(get_ByteLength(encipheredBlock)) + encipheredBlock); 
+	}
+	else
+		error("Invalid P2");
+}
+
+function bulid_PinBlock(pinData, cardRandomNumber, ICC_PIN_Encipherment_PK, Option)
+{
+	
+	var block;
+	
+	if((Option  & INVALID_PIN_BLOCK_HEADER ) == INVALID_PIN_BLOCK_HEADER ) 
+		block = "6F";
+	else
+		block = "7F";
+		
+	block = block + pinData + cardRandomNumber;
+	var padLength = (ICC_PIN_Encipherment_PK.length - block.length) / 2;
+			
+	block = block + random(padLength);
+
+	return block;
+}
+	
+function send_ExternalAuth()
+{
+	print('\n*******************************************');
+	print('* External Authentication');
+	print('*******************************************');
+	return send_ExternalAuth_ARC(ARC_00);
+}
+
+function send_ExternalAuth_Invalid()
+{
+	print('\n*******************************************');
+	print('* External Authentication with invalid MAC');
+	print('*******************************************');
+	return send('008200000A'+ '112233445566778899AA');
+}
+
+function send_InternalAuth()
+{
+	print('\n*******************************************');
+	print('* Internal Authentication');
+	print('*******************************************');
+	response = send("0088000004" + DDOL_Data + "00");
+	parse_InternalAuth_Response(response);
+	return response;
+}
+
+function send_ExternalAuth_ARC(ARC)
+{
+	ARPC = calc_ARPC(ARC);
+	return send('008200000A'+ ARPC +  ARC);
+}
+
+function send_AppBlock()
+{
+	print('\n*******************************************');
+	print("* Application Block");
+	print('*******************************************');
+	mac = calc_MAC_ABK();
+	return send("841E000004" +  mac.substring(0,8));
+}
+
+
+function send_CardBlock()
+{
+	print('\n*******************************************');
+	print("* Card Block");
+	print('*******************************************');
+	mac = calc_MAC_CBK();
+	return send("8416000004" +  mac.substring(0,8));
+}
+
+function send_AppBlock_Invalid()
+{
+	print('\n*******************************************');
+	print("* Application Block Invalid MAC");
+	print('*******************************************');
+	return send("841E000004" +  '11223344');
+}
+
+function send_AppBlock_noMAC()
+{
+	print('\n*******************************************');
+	print("* Application Block without MAC");
+	print('*******************************************');
+	return send("841E000000");
+}
+
+
+function send_AppUnblock()
+{
+	print('\n*******************************************');
+	print("* Application Unblock");
+	print('*******************************************');
+	mac = calc_MAC_AUBK();
+	return send("8418000004" +  mac.substring(0,8));
+}
+
+function send_AppUnblock_Invalid()
+{
+	print('\n*******************************************');
+	print("* Application Unblock with Invalid MAC");
+	print('*******************************************');
+	return send("8418000004" +  "11223344");
+}
+
+function send_AppUnblock_noMAC()
+{
+	print('\n*******************************************');
+	print("*Application Unblock without MAC");
+	print('*******************************************');
+	return send("8418000000");
+	
+}
+
+function send_PinUnblock()
+{
+	print('\n*******************************************');
+	print("* PIN Unblock");
+	print('*******************************************');
+	mac = calc_MAC_PIN('00');
+	return send("8424000004" + mac.substring(0,8));
+}
+
+
+/*
+function send_GEN_AC_1_forVcu(p1, cdata)
+{
+	print('\n*******************************************');
+	print('* Generate AC - First Issuance');
+	print('*******************************************');
+	len_cdol = (cdata.length)/2;
+	response = send('80AE' + toHex(p1) +'00'+len_cdol + cdata);
+	
+	switch(p1&0xC0) 
+	{
+		case AAC:
+			print("\n* - AAC requested");
+			break;
+		case TC:
+			print("\n* - TC requested");
+			break;
+		case ARQC:
+			print("\n* - ARQC requested");
+			break;
+		default:
+			print("\n* - Unknown Application Cryptogram requested");
+	}
+
+	if((p1&CDA_sign_requested) == CDA_sign_requested) {
+		print("* - CDA signature requested");
+	} else {
+		print("* - CDA signature not requested");
+	}
+	
+	parse_CDOL1(cdata);
+	//CDOL1에 Transaction Time이 포함된 경우
+	if(cdata.length == 64)
+		CDOL1_Data = cdata.substring(0, 48) + cdata.substring(54, 64);
+	else
+		CDOL1_Data = cdata;
+	
+	GEN_AC_Sequence = GEN_AC_1;
+	
+	if(getSW() == "9000")
+	{
+		GEN_AC_Response = response;
+		parse_GEN_AC_Response(response);
+	}
+			
+	return GEN_AC_Response;
+}
+*/
+
+function send_GEN_AC_1(p1, cdata)
+{
+	print('\n*******************************************');
+	print('* Generate AC - First Issuance');
+	print('*******************************************');
+	
+	//response = send('80AE' + toHex(p1) +'0020' + cdata);
+	
+	len_cdol = toHex((cdata.length)/2);
+	response = send('80AE' + toHex(p1) +'00'+len_cdol + cdata);
+	
+	switch(p1&0xC0) 
+	{
+		case AAC:
+			print("\n* - AAC requested");
+			break;
+		case TC:
+			print("\n* - TC requested");
+			break;
+		case ARQC:
+			print("\n* - ARQC requested");
+			break;
+		default:
+			print("\n* - Unknown Application Cryptogram requested");
+	}
+
+	if((p1&CDA_sign_requested) == CDA_sign_requested) {
+		print("* - CDA signature requested");
+	} else {
+		print("* - CDA signature not requested");
+	}
+	
+	parse_CDOL1(cdata);
+	//CDOL1에 Transaction Time이 포함된 경우
+	if(cdata.length == 64)
+		CDOL1_Data = cdata.substring(0, 48) + cdata.substring(54, 64);
+	else
+		CDOL1_Data = cdata;
+	
+	GEN_AC_Sequence = GEN_AC_1;
+	
+	if(getSW() == "9000")
+	{
+		GEN_AC_Response = response;
+		parse_GEN_AC_Response(response);
+	}
+			
+	return GEN_AC_Response;
+}
+
+function send_GEN_AC_2(p1, cdata)
+{
+	print('\n*******************************************');
+	print("* Generate AC - Second issuance");
+	print('*******************************************');
+	
+	response = send('80AE' + toHex(p1) + '0022'+ cdata);
+	
+	switch(p1&0xC0) 
+	{
+		case AAC:
+			print("\n* - AAC requested");
+			break;
+		case TC:
+			print("\n* - TC requested");
+			break;
+		case ARQC:
+			print("\n* - ARQC requested");
+			break;
+		default:
+			print("\n* - Unknown Application Cryptogram requested");
+	}
+
+	if((p1&CDA_sign_requested) == CDA_sign_requested) {
+		print("* - CDA signature requested");
+	} else {
+		print("* - CDA signature not requested");
+	}
+	
+	parse_CDOL2(cdata);
+	//CDOL2에 Transaction Time이 포함된 경우
+	if(cdata.length == 68)
+		CDOL2_Data = cdata.substring(0, 52) + cdata.substring(58, 68);
+	else 
+		CDOL2_Data = cdata;
+		
+	GEN_AC_Sequence = GEN_AC_2;
+	
+	if(getSW() == "9000")
+	{
+		GEN_AC_Response = response;
+		parse_GEN_AC_Response(response);
+	}
+	
+	return GEN_AC_Response;
+}
+
+function send_GEN_AC1_forVC(p1)
+{
+	var GEN_AC_Response = send_GEN_AC_1(p1, AA_forVC + AO_forVC + TCO_forVC + TVR_forVC + TCC_forVC + TD_forVC + "FFFFFF"+ TT_forVC + "11223344");
+	init_forVC();
+	return GEN_AC_Response;
+}
+
+function send_GEN_AC2_forVC(p1)
+{
+	var GEN_AC_Response = send_GEN_AC_2(p1, ARC_forVC + AA_forVC + AO_forVC + TCO_forVC + TVR_forVC + TCC_forVC + TD_forVC + "FFFFFF" + TT_forVC + "11223344");
+	init_forVC();
+	return GEN_AC_Response;
+}
+
+function get_sessionKey(uniqueKey_A, uniqueKey_B)
+{
+	check_ValidAC();	
+	check_ValidATC();
+	
+	sessionKey_A = tdes_cbc("000000000000" + ATC, uniqueKey_A + uniqueKey_B);
+	sessionKey_B = tdes_cbc("000000000000" + xor(ATC, "FFFF"), uniqueKey_A + uniqueKey_B);
+	print('\n----------Session Key Generation-----------');
+	print('Unique Key A : ' + uniqueKey_A);
+	print('Unique Key B : ' + uniqueKey_B);
+	print('Session Key A : ' + sessionKey_A);
+	print('Session Key B : ' + sessionKey_B);
+	print('-------------------------------------------');
+	
+	return sessionKey_A + sessionKey_B;
+}
+
+
+//VC 테스트를 위한 CDOL data를 기본값으로 할당
+function init_forVC()
+{	
+	ARC_forVC = "3030"; //Authorization Response Code for Velocity Checking
+	AA_forVC = "000000001000"; //Amount, Authorized for Velocity Checking
+	AO_forVC = "000000000000" //Amount, Other for Velocity Checking 
+	TCO_forVC = "0156" // Terminal Country Code for Velocity Checking
+	TVR_forVC = "0000000000" // Terminal Verification Result for Velocity Checking
+	TCC_forVC = "0156"; // Transaction Currency Code for Velocity Checking
+	TD_forVC = "000125" //Transaction Date for Velocity Checking
+	TT_forVC = "00" // Transaction Type for Velocity Checking
+}
+
+//Authorization Response Code for Velocity Checking
+function set_ARC_forVC(data)
+{
+	ARC_forVC = data;
+}
+//Amount, Authorized for Velocity Checking
+function set_AA_forVC(data)
+{
+	AA_forVC = data;
+}
+//Amount, Other for Velocity Checking 
+function set_AO_forVC(data)
+{
+	AO_forVC = data;
+}
+// Terminal Country Code for Velocity Checking
+function set_TCO_forVC(data)
+{
+	TCO_forVC = data;
+}
+// Terminal Verification Result for Velocity Checking
+function set_TVR_forVC(data)
+{
+	TVR_forVC = data;
+}
+//Transaction Currency Code for Velocity Checking
+function set_TCC_forVC(data)
+{
+	TCC_forVC = data;
+}
+//Transaction Date for Velocity Checking
+function set_TD_forVC(data)
+{
+	TD_forVC = data;
+}
+// Transaction Type for Velocity Checking
+function set_TT_forVC(data)
+{
+	TT_forVC = data;
+}
+
+function set_InvalidCardRandomNumber()
+{
+	cardRandomNumber = "FFFFFFFFFFFFFFFF";
+}
+
+
+/*
+function send_GEN_AC_2(controlParam)
+{
+	return send_GEN_AC_2_ARC(controlParam, ARC_00);
+}
+*/
+
+function check_CID(value)
+{
+	print("test CID : "+ value);
+	print("my   CID : "+ CID);
+	
+	if(CID != value)
+		error("* Check CID......FAIL");
+	else
+		print("\n* Check CID......PASS");
+}
+
+function check_CVR(value)
+{
+	print("test cvr : "+ value);
+	print("my   cvr : "+ CVR);
+	
+	if(CVR != value)
+		error("* Check CVR......FAIL");
+	else 
+		print("\n* Check CVR......PASS");
+	
+}
+
+function store_ATC()
+{
+	lastATC = ATC;
+}
+
+function check_ATC()
+{
+	if(parseInt(lastATC, 16) + 1 != parseInt(ATC, 16))
+		error("* Check ATC whether it is incremented......FAIL");
+	else
+		print("* Check ATC whether it is incremented......PASS");
+}
+
+function make_TLV(tag, length, value)
+{
+	return tag + length + value;
+}
+
+
+function get_ByteLength(data)
+{
+	return data.length / 2;
+}
+
+function send_Command_CorrectedLe(command)
+{
+	response = send(command);
+	if(getSW().substring(0,2) == '6C') {
+		response = send(command.substring(0, command.length - 2) + getSW().substring(2,4));
+	}
+	return response;
+
+}
+
+function parse_CDOL1(cdata)
+{
+	print('\n*************************************************');
+	print('* -- CDOL1 Data ');
+	print('*************************************************');
+	print('* Amount, Authorized : ' + cdata.substring(0,12));
+	print('* Amount, Other : ' + cdata.substring(12,24));
+	print('* Terminal Country code : ' + cdata.substring(24,28));
+	print('* Terminal Verification Results : ' + cdata.substring(28,38));
+	print('* Transaction Currency code : ' + cdata.substring(38,42));
+	print('* Transaction Date : ' + cdata.substring(42,48));
+	print('* Transaction Time : ' + cdata.substring(48, 54));
+	print('* Transaction Type : ' + cdata.substring(54,56));
+	print('* Unpredictable Number : ' + cdata.substring(56,64));
+}
+
+function parse_CDOL2(cdata)
+{
+	print('\n*************************************************');
+	print('* -- CDOL2 Data ');
+	print('*************************************************');
+	print('* Authorization Response Code : ' + cdata.substring(0,4));
+	print('* Amount, Authorized : ' + cdata.substring(4,16));
+	print('* Amount, Other : ' + cdata.substring(16,28));
+	print('* Terminal Country code : ' + cdata.substring(28,32));
+	print('* Terminal Verification Results : ' + cdata.substring(32,42));
+	print('* Transaction Currency code : ' + cdata.substring(42,46));
+	print('* Transaction Date : ' + cdata.substring(46,52));
+	print('* Transaction Time : ' + cdata.substring(52, 58));
+	print('* Transaction Type : ' + cdata.substring(58,60));
+	print('* Unpredictable Number : ' + cdata.substring(60,68));
+}
+
+
+function parse_InternalAuth_Response(response)
+{
+	print('\n*************************************************');
+	print("* Internal Authentication Response Data Interpretation : -");
+	print('*************************************************');
+		
+	var issuer_PK_Modulus = retrieve_Issuer_PK_Modulus(CA_PK_Modulus, CA_PK_Exponent);
+	print("\n*****************************************************");
+	print("Issuer Public Key Modulus : " + issuer_PK_Modulus);
+	print("*******************************************************");
+	var ICC_PK_Modulus = retrieve_ICC_PK_Modulus(issuer_PK_Modulus);
+	print("\n*****************************************************");
+	print("ICC Public Key Modulus : " + ICC_PK_Modulus);
+	print("*******************************************************");
+	
+	print('\n*************************************************');
+	print("* - Retrieve Signed Dynamic Application Data for DDA");
+	print('*************************************************');
+
+	
+	//retrive ICC Public Key Exponent and decrypt Signed Dynamic Application Data
+	var encrypted_SDAD = lookup_BER_TLV(response, "80", RETURN_VALUE);
+	var recordData = lookup_BER_TLV(send_ReadRecord(2,5), "70", RETURN_VALUE);
+	ICC_PK_Exponent = lookup_BER_TLV(recordData, "9F47", RETURN_VALUE);
+	decrypted_SDAD = decRSAwithPublicKey(encrypted_SDAD ,ICC_PK_Modulus , ICC_PK_Exponent);
+	print("* - Encrypted Signed Application Data : " + encrypted_SDAD);
+	print("* - Decrypted Signed Application Data : " + decrypted_SDAD);
+	
+	validate_SDAD_forDDA(decrypted_SDAD);
+}
+
+
+function parse_GEN_AC_Response(response)
+{
+	print('\n*************************************************');
+	print("* Generate AC Response Data Interpretation : -");
+	print('*************************************************');
+	
+	if(response.substring(0, 2) == "80")
+		parse_GEN_AC_Response_80(response);
+	else if(response.substring(0, 2) == "77")
+		parse_GEN_AC_Response_77(response);
+	else
+		print("* Invalid Template.");
+}
+
+function parse_GEN_AC_Response_80(response)
+{
+	var value_80 = lookup_BER_TLV(response, "80", RETURN_VALUE);
+	
+	print("* Tag 80 Response Message Template Format 1");
+	print("*	- Len " + lookup_BER_TLV(response, "80", RETURN_LENGTH));
+	
+	print("* Tag 9F27 Cryptogram Information Data (CID)");
+	var CID_Response = value_80.substring(0,2);
+	print("*	- Len 01");
+	print("*	- Value " +  CID_Response);
+	switch(CID_Response)
+	{
+		case "80":
+			print("* - ARQC returned");
+			break;
+		case "40":
+			print("* - TC returned");
+			break;
+		case "00":
+			print("* - AAC returned");
+			break;
+		default:
+			print("* - Unknown Application Cryptogram");
+	}
+	
+	print("* Tag 9F36 Application Transaction Counter (ATC)");
+	print("*	- Len 02");
+	print("*	- Value " + value_80.substring(2,6));
+	
+	print("* Tag 9F26 Application Cryptogram (AC)");
+	print("*	- Len 08");
+	print("*	- Value " + value_80.substring(6,22));
+	
+	
+	//assign Values
+	CID = CID_Response;
+	ATC = value_80.substring(2,6);
+	if(GEN_AC_Sequence == GEN_AC_1)	
+		AC = value_80.substring(6,22);
+		
+	//IAD가 존재하면...
+	if(value_80.length > 22)
+		parse_IAD(value_80.substring(22));
+		
+	validate_AC(value_80.substring(6,22));
+}
+
+
+function parse_GEN_AC_Response_77(response)
+{
+	var value_77 = lookup_BER_TLV(response, "77", RETURN_VALUE);
+	
+	print("* Tag 77 Response Message Template Format 2");
+	print("*	- Len " + lookup_BER_TLV(response, "77", RETURN_LENGTH) + " ( Constructed Data Object :- )");
+	
+	print("* Tag 9F27 Cryptogram Information Data (CID)");
+	var CID_Response = lookup_BER_TLV(value_77, "9F27", RETURN_VALUE);
+	print("*	- Len " +  lookup_BER_TLV(value_77, "9F27", RETURN_LENGTH));
+	print("*	- Value " +  CID_Response);
+	switch(CID_Response)
+	{
+		case "80":
+			print("* - ARQC returned");
+			break;
+		case "40":
+			print("* - TC returned");
+			break;
+		case "00":
+			print("* - AAC returned");
+			break;
+		default:
+			print("* - Unknown Application Cryptogram");
+	}
+	
+	print("* Tag 9F36 Application Transaction Counter (ATC)");
+	print("*	- Len " +  lookup_BER_TLV(value_77, "9F36", RETURN_LENGTH));
+	print("*	- Value " +  lookup_BER_TLV(value_77, "9F36", RETURN_VALUE));
+	
+	//assign Values
+	CID = CID_Response;
+	ATC = lookup_BER_TLV(value_77, "9F36", RETURN_VALUE);
+	
+	
+	if(CID_Response != "00")
+	{
+		print("* Tag 9F4B Signed Dynamic Application Data");
+		print("*	- Len " +  lookup_BER_TLV(value_77, "9F4B", RETURN_LENGTH));
+		print("*	- Value " +  lookup_BER_TLV(value_77, "9F4B", RETURN_VALUE));
+		
+		//parse Signed Dynamic Application Data
+		var ICC_Dynamic_Data = parse_SDAD(lookup_BER_TLV(value_77, "9F4B", RETURN_VALUE));
+		
+		//Parse Issuer Application Data
+		parse_IAD(lookup_BER_TLV(value_77, "9F10", RETURN_VALUE));	
+		
+		//Validate Application Cryptogram
+		validate_AC(ICC_Dynamic_Data.substring(ICC_Dynamic_Data.length - 56, ICC_Dynamic_Data.length - 40));
+	}
+	else
+	{
+		print("* Tag 9F26 AAC");
+		print("*	- Len " +  lookup_BER_TLV(value_77, "9F26", RETURN_LENGTH));
+		print("*	- Value " +  lookup_BER_TLV(value_77, "9F26", RETURN_VALUE));
+		
+		//assign Values
+		if(GEN_AC_Sequence == GEN_AC_1)
+			AC = lookup_BER_TLV(value_77, "9F26", RETURN_VALUE);
+			
+		//Parse Issuer Application Data
+		parse_IAD(lookup_BER_TLV(value_77, "9F10", RETURN_VALUE));	
+		
+		//Validate Application Cryptogram
+		validate_AC(lookup_BER_TLV(value_77, "9F26", RETURN_VALUE));
+	}
+}
+
+//Signed Dynamic Application Data를 분석한다.
+//입력 :SDAD
+//출력 : ICC Dynamic Data
+function parse_SDAD(SDAD)
+{
+	var issuer_PK_Modulus = retrieve_Issuer_PK_Modulus(CA_PK_Modulus, CA_PK_Exponent);
+	print("\n*****************************************************");
+	print("Issuer Public Key Modulus : " + issuer_PK_Modulus);
+	print("*******************************************************");
+	var ICC_PK_Modulus = retrieve_ICC_PK_Modulus(issuer_PK_Modulus);
+	print("\n*****************************************************");
+	print("ICC Public Key Modulus : " + ICC_PK_Modulus);
+	print("*******************************************************");
+	var ICC_Dynamic_Data = retrieve_ICC_Dyanmic_Data_CDA(SDAD, ICC_PK_Modulus);
+	
+	//assign Values
+	if(GEN_AC_Sequence == GEN_AC_1)
+		AC = ICC_Dynamic_Data.substring(ICC_Dynamic_Data.length - 56, ICC_Dynamic_Data.length - 40);
+	
+	return ICC_Dynamic_Data;
+}
+
+function pad(data){
+	pad_len = (data.length/2)%8;
+  	pad_len = 8 - pad_len;
+  	if (pad_len != 0) {
+  		data = data + '80';
+  		for(i=0; i < pad_len-1; i++) {
+  			data = data + '00';
+  		}
+  	}
+	return data;
+}
+
+function validate_AC(AC)
+{
+	var sourceData ,calculated_AC;
+		
+	if(is_qPBOC == false){
+		if(GEN_AC_Sequence == GEN_AC_1)
+			sourceData = CDOL1_Data;
+		else
+			sourceData = CDOL2_Data.substring(4);
+		sourceData = sourceData + AIP + ATC + CVR;
+		UDK = uniqueDEA_A + uniqueDEA_B;
+	}else{
+		sourceData = Amount_Authorised + Unpredictable_Number + ATC + CVR.substr(2, 2);
+	}
+		
+  	sourceData = pad(sourceData);
+
+  	check_ValidATC();
+	sessionDEA_A = tdes_cbc("000000000000" + ATC, UDK);
+	sessionDEA_B = tdes_cbc("000000000000" + xor(ATC, "FFFF"), UDK);
+  	calculated_AC = ftdesMAC(sourceData, sessionDEA_A + sessionDEA_B);
+	print("\n***********************************************");
+	print("* Application Cryptogram Validation");
+	print("***********************************************");
+	print("* Source Data : " + sourceData);
+	print("* ATC : " + ATC);
+	print("* Unique DEA Key : " + UDK.toUpperCase());
+	print("* Session Key : " + sessionDEA_A.toUpperCase() + sessionDEA_B.toUpperCase());
+	print("* Calculated Application Cryptogram : " + calculated_AC.toUpperCase());
+	print("* Application Cryptogram in Generate AC response : " + AC);
+	
+	if(calculated_AC.toUpperCase() != AC)
+		error("* Applcation Cryptogram Validation.....FAIL");
+	else
+		print("* Applcation Cryptogram Validation.....PASS");
+	
+}
+
+function validate_IAD_MAC(data, mac_length)
+{
+        print("mac : " + data)
+        var sourceData ,calculated_AC;
+        sourceData = data.substring(0, data.length - 8);
+        _AC = data.substring(data.length - 8, data.length);
+        print(sourceData);
+        print(_AC);
+               
+        sourceData = ATC + sourceData;
+        sourceData = sourceData + "00";
+        sourceData = pad(sourceData, 16);
+
+        check_ValidATC();
+        sessionDEA_A = tdes_cbc("000000000000" + ATC, uniqueMAC_A + uniqueMAC_B);
+       sessionDEA_B = tdes_cbc("000000000000" + xor(ATC, "FFFF"), uniqueMAC_A + uniqueMAC_B);        
+        
+        calculated_AC = ftdesMAC(sourceData, sessionDEA_A + sessionDEA_B);
+        print("\n***********************************************");
+        print("*  MAC returned in the Tag 9F10 Validation");
+        print("***********************************************");
+        print("* Source Data : " + sourceData);
+        print("* ATC : " + ATC);
+        print("* Unique DEA Key : " + uniqueDEA_A.toUpperCase() + uniqueDEA_B.toUpperCase());
+        print("* Session Key : " + sessionDEA_A.toUpperCase() + sessionDEA_B.toUpperCase());
+        print("* Calculated Application Cryptogram : " + calculated_AC.toUpperCase());
+        print("* Application Cryptogram in Generate AC response : " + _AC);
+               
+        if(mac_length == null) mac_length = 4;
+        
+        if(calculated_AC.toUpperCase().substring(0, mac_length*2) != _AC)
+               error("* MAC returned in the Tag 9F10 Validation.....FAIL");
+        else
+               print("* MAC returned in the Tag 9F10 Validation.....PASS"); 
+}
+
+/*
+function validate_IAD_MAC(data)
+{
+	var sourceData ,calculated_AC;
+	sourceData = data.substring(0, data.length - 8);
+	AC = data.substring(data.length - 8, data.length);
+	print(sourceData);
+	print(AC);
+		
+  	sourceData = ATC + sourceData;
+  	sourceData = pad(sourceData);
+
+  	check_ValidATC();
+	sessionDEA_A = tdes_cbc("000000000000" + ATC, uniqueDEA_A + uniqueDEA_B);
+	sessionDEA_B = tdes_cbc("000000000000" + xor(ATC, "FFFF"), uniqueDEA_A + uniqueDEA_B);
+  	calculated_AC = ftdesMAC(sourceData, sessionDEA_A + sessionDEA_B);
+	print("\n***********************************************");
+	print("*  MAC returned in the Tag 9F10 Validation");
+	print("***********************************************");
+	print("* Source Data : " + sourceData);
+	print("* ATC : " + ATC);
+	print("* Unique DEA Key : " + uniqueDEA_A.toUpperCase() + uniqueDEA_B.toUpperCase());
+	print("* Session Key : " + sessionDEA_A.toUpperCase() + sessionDEA_B.toUpperCase());
+	print("* Calculated Application Cryptogram : " + calculated_AC.toUpperCase());
+	print("* Application Cryptogram in Generate AC response : " + AC);
+	
+	if(calculated_AC.toUpperCase() != AC)
+		error("* MAC returned in the Tag 9F10 Validation.....FAIL");
+	else
+		print("* MAC returned in the Tag 9F10 Validation.....PASS");
+	
+}
+
+*/
+function retrieve_ICC_PIN_Encipherment_PK_Modulus(issuer_PK_Modulus)
+{
+	var recordData;
+	var ICC_PIN_Certificate;
+	var ICC_PIN_PK;
+	var ICC_PIN_PK_Recovered;
+	var ICC_PK_Reminder;
+	
+	print("\n -- Retrieve ICC PIN Encipherment Public Key");
+	
+	//retrieve ICC PIN Encipherment Public Key Certificate
+	recordData = lookup_BER_TLV(send_ReadRecord(2,7), "70", RETURN_VALUE);
+	ICC_PIN_Certificate = lookup_BER_TLV(recordData, "9F2D", RETURN_VALUE);
+	print("* - Tag 9F2D ICC PIN Encipherment Public Key Certificate");
+	print("* - Len " + get_ByteLength(ICC_PIN_Certificate));
+	print("*	- Value " + ICC_PIN_Certificate);
+	
+	//Retrieve Issuer Public Key Exponent
+	recordData = lookup_BER_TLV(send_ReadRecord(2,2), "70", RETURN_VALUE);
+	issuer_PK_Exponent = lookup_BER_TLV(recordData, "9F32", RETURN_VALUE);
+	print("* - Tag 9F32 Issuer Public Key Exponent for PIN Encipherment");
+	print("* - Len " + get_ByteLength(issuer_PK_Exponent));
+	print("*	- Value " + issuer_PK_Exponent);
+	
+	//Retrieve ICC PIN Encipherment Public Key Reminder
+	recordData = lookup_BER_TLV(send_ReadRecord(2,8), "70", RETURN_VALUE);
+	ICC_PK_Reminder = lookup_BER_TLV(recordData, "9F2F", RETURN_VALUE);
+	print("* - Tag 9F48 Issuer Public Key Remainder for PIN Encipherment");
+	print("* - Len " + get_ByteLength(ICC_PK_Reminder));
+	print("*	- Value " + ICC_PK_Reminder);
+	
+	ICC_PIN_PK_Recovered = decRSAwithPublicKey(ICC_PIN_Certificate ,issuer_PK_Modulus ,issuer_PK_Exponent);
+	print("* - Data Recovered from the ICC PIN Encipherment Public Key Certificate");
+	print("* - Len " + get_ByteLength(ICC_PIN_PK_Recovered));
+	print("*	- Value " + ICC_PIN_PK_Recovered);
+	
+	return ICC_PIN_PK_Recovered.substring(42, ICC_PIN_PK_Recovered.length - 42) + ICC_PK_Reminder;
+	
+}
+
+function retrieve_Issuer_PK_Modulus(CA_PK_Modulus, CA_PK_Exponent)
+{
+	var issuer_PK_Certificate;
+	var issuer_PK_Modulus;
+	var issuer_PK_Reminder;
+	var issuer_PK_Exponent;
+	var PAN;
+	var recordData;
+
+	print('\n*************************************************');
+	print("* Retrieve Issuer Public Key");	
+	print('*************************************************');
+	//Retrieve Issuer Public Key Certificate
+	recordData = lookup_BER_TLV(send_ReadRecord(2,1), "70", RETURN_VALUE);
+	issuer_PK_Certificate = lookup_BER_TLV(recordData, "90", RETURN_VALUE);
+	print("* - Tag 90 Issuer Public Key Certificate");
+	print("* - Len " + get_ByteLength(issuer_PK_Certificate));
+	print("*	- Value " + issuer_PK_Certificate);
+	
+	//Retrieve Issuer Public Key Reminder
+	recordData = lookup_BER_TLV(send_ReadRecord(2,2), "70", RETURN_VALUE);
+	issuer_PK_Reminder = lookup_BER_TLV(recordData, "92", RETURN_VALUE);
+	print("* - Tag 92 Issuer Public Key Remainder");
+	print("* - Len " + get_ByteLength(issuer_PK_Reminder));
+	print("*	- Value " + issuer_PK_Reminder);
+
+	//Retrieve Isser Public Key Exponent
+	issuer_PK_Exponent = lookup_BER_TLV(recordData, "9F32", RETURN_VALUE);
+	print("* - Tag 9F32 Issuer Public Key Exponent");
+	print("* - Len " + get_ByteLength(issuer_PK_Exponent));
+	print("*	- Value " + issuer_PK_Exponent);	
+	
+	//Retrieve PAN
+	recordData = lookup_BER_TLV(send_ReadRecord(3,1), "70", RETURN_VALUE);
+	PAN = lookup_BER_TLV(recordData, "5A", RETURN_VALUE);
+
+	var issuer_PK_Recovered = decRSAwithPublicKey(issuer_PK_Certificate ,CA_PK_Modulus , CA_PK_Exponent);
+	print("* - Data Recovered from the Issuer Public Key Certificate");
+	print("* - Len " + get_ByteLength(issuer_PK_Recovered));
+	print("*	- Value " + issuer_PK_Recovered);
+	
+	validate_Issuer_PK_Recovered(issuer_PK_Recovered, issuer_PK_Reminder, issuer_PK_Exponent, PAN);
+	
+	issuer_PK_Modulus = issuer_PK_Recovered.substring(30, issuer_PK_Recovered.length - 42) + issuer_PK_Reminder;
+	print("* - Issuer Public Key Modulus");
+	print("* - Len " + get_ByteLength(issuer_PK_Modulus));
+	print("*	- Value " + issuer_PK_Modulus);
+	
+	return issuer_PK_Modulus;
+}
+
+function retrieve_ICC_PK_Modulus(issuer_PK_Modulus)
+{
+	var issuer_PK_Exponent;
+	var ICC_PK_Certificate;
+	var ICC_PK_Modulus;
+	var ICC_PK_Reminder;
+	var ICC_PK_Exponent;
+	var PAN;
+	var recordData;
+
+	print('\n*************************************************');
+	print("* Retrieve ICC Public Key");	
+	print('*************************************************');
+	//Retrieve ICC Public Key Certificate
+	recordData = lookup_BER_TLV(send_ReadRecord(2,4), "70", RETURN_VALUE);
+	ICC_PK_Certificate = lookup_BER_TLV(recordData, "9F46", RETURN_VALUE);
+	print("* - Tag 9F46 ICC Public Key Certificate");
+	print("* - Len " + get_ByteLength(ICC_PK_Certificate));
+	print("*	- Value " + ICC_PK_Certificate);
+	
+	//Retrieve ICC Public Key Exponent
+	recordData = lookup_BER_TLV(send_ReadRecord(2,5), "70", RETURN_VALUE);
+	ICC_PK_Exponent = lookup_BER_TLV(recordData, "9F47", RETURN_VALUE);
+	print("* - Tag 9F47 ICC Public Key Exponent");
+	print("* - Len " + get_ByteLength(ICC_PK_Exponent));
+	print("*	- Value " + ICC_PK_Exponent);
+	
+	//Retrieve ICC Public Key Reminder
+	ICC_PK_Reminder = lookup_BER_TLV(recordData, "9F48", RETURN_VALUE);
+	print("* - Tag 9F48 Issuer Public Key Remainder");
+	print("* - Len " + get_ByteLength(ICC_PK_Reminder));
+	print("*	- Value " + ICC_PK_Reminder);
+
+	//Retrieve PAN
+	recordData = lookup_BER_TLV(send_ReadRecord(3,1), "70", RETURN_VALUE);
+	PAN = lookup_BER_TLV(recordData, "5A", RETURN_VALUE);
+	
+	//Retrieve Isser Public Key Exponent
+	recordData = lookup_BER_TLV(send_ReadRecord(2,2), "70", RETURN_VALUE);
+	issuer_PK_Exponent = lookup_BER_TLV(recordData, "9F32", RETURN_VALUE);
+	print("* - Tag 9F32 Issuer Public Key Exponent");
+	print("* - Len " + get_ByteLength(issuer_PK_Exponent));
+	print("*	- Value " + issuer_PK_Exponent);
+
+	var ICC_PK_Recovered = decRSAwithPublicKey(ICC_PK_Certificate, issuer_PK_Modulus, issuer_PK_Exponent);
+	print("* - Data Recovered from the ICC Public Key Certificate");
+	print("* - Len " + get_ByteLength(ICC_PK_Recovered));
+	print("*	- Value " + ICC_PK_Recovered);
+	
+	validate_ICC_PK_Recovered(ICC_PK_Recovered, ICC_PK_Reminder, ICC_PK_Exponent, PAN); 
+	
+	ICC_PK_Modulus = ICC_PK_Recovered.substring(42, ICC_PK_Recovered.length - 42) + ICC_PK_Reminder;
+	print("* - Issuer Public Key Modulus");
+	print("* - Len " + get_ByteLength(ICC_PK_Modulus));
+	print("*	- Value " + ICC_PK_Modulus);
+	
+	return ICC_PK_Modulus;
+}
+
+//Issuer PK Certificate에서 복호화된 데이터를 검증한다.
+//이 함수는 data가 Issuer PK Certificate로 부터 복호화된 데이터라고 가정한다.
+function validate_Issuer_PK_Recovered(issuer_PK_Recovered, issuer_PK_Reminder, issuer_PK_Exponent, PAN)
+{
+	var msg1, msg2, hash, hashResult;
+	print('\n*************************************************');
+	print("* - Validate Issuer Public Key Recovered");
+	print('*************************************************');
+	
+	//validate Recovered Data Header and Certificate Format
+	print("* - validate Recovered Data Header and Certificate Format");
+	if(issuer_PK_Recovered.substring(0,2) != "6A")
+		print("* - Invalid Recovered Data Header");
+	else 
+		print("* - Recovered Data Validation...PASS");
+	if(issuer_PK_Recovered.substring(2,4) != "02")
+		print("Invalid Certificate Format");
+	else
+		print("* - Certificate Format Validation...PASS");
+	
+	//validate Hash Result
+	print("* - Validate Hash Result");
+	hashResult = issuer_PK_Recovered.substring(issuer_PK_Recovered.length - 42, issuer_PK_Recovered.length - 2); 
+	msg1 = issuer_PK_Recovered.substring(2, issuer_PK_Recovered.length - 42);
+	msg2 = issuer_PK_Reminder + issuer_PK_Exponent;
+	print("* - Data to be hashed : " + msg1 + msg2);	
+	hash = messageDigest_SHA1(msg1 + msg2).toUpperCase();
+	print("* - Calculated Hash : " + hash);
+	print("* - Hash Result : " + hashResult); 
+	if(hash != hashResult)
+		print("* - Invalid Hash Result");
+	else 
+		print("* - Hash Result Validation...PASS");
+	
+	//validate Issuer Identifier
+	print("* - Validate Issuer Identifier");
+	print("* - Issuer Identifier : " + issuer_PK_Recovered.substring(4, 12));
+	print("* - PAN : " + PAN);
+	if(compare_PAN(issuer_PK_Recovered.substring(4, 12), PAN) == -1)
+		print("* - Invalid Issuer Identifier");
+	else
+		print("* - Issuer Identifier validation...PASS");
+}
+								
+//ICC PK Certificate에서 복호화된 데이터를 검증한다.
+//이 함수는 data가 ICC PK Certificate로 부터 복호화된 데이터라고 가정한다.
+function validate_ICC_PK_Recovered(ICC_PK_Recovered, ICC_PK_Reminder, ICC_PK_Exponent, PAN)
+{
+	var msg1, msg2, hash, hashResult;
+	
+	print('\n*************************************************');
+	print("* - Validate ICC Public Key Recovered");
+	print('*************************************************');
+	
+	//validate Recovered Data Header and Certificate Format
+	print('\n*************************************************');
+	print("* - validate Recovered Data Header and Certificate Format");
+	print('*************************************************');
+	if(ICC_PK_Recovered.substring(0,2) != "6A")
+		print("Invalid Recovered Data Header");
+	else
+		print("* - Recovered Data Validation...PASS");
+	if(ICC_PK_Recovered.substring(2,4) != "04")
+		print("Invalid Certificate Format");
+	else
+		print("* - Certificate Format Validation...PASS");
+	
+	//validate Hash Result
+	print('\n*************************************************');
+	print("* - Validate Hash Result");
+	print('*************************************************');
+	hashResult = ICC_PK_Recovered.substring(ICC_PK_Recovered.length - 42, ICC_PK_Recovered.length - 2);
+	msg1 = ICC_PK_Recovered.substring(2, ICC_PK_Recovered.length - 42);
+	msg2 = ICC_PK_Reminder + ICC_PK_Exponent + retrieve_StaticData(AFL, AIP);
+	print("* - Data to be hashed : " + msg1 + msg2);	
+	hash = messageDigest_SHA1(msg1 + msg2).toUpperCase();
+	print("* - Calculated Hash : " + hash);
+	print("* - Hash Result : " + hashResult); 
+	if(hash != hashResult)
+		print("* - Invalid Hash Result");
+	else 
+		print("* - Hash Result Validation...PASS");
+	print('\n*************************************************');
+	print("* - Validate Application PAN");	
+	print('*************************************************');
+	print("* - Application PAN in ICC Public Key recovered : " + ICC_PK_Recovered.substring(4, 24));
+	print("* - Application PAN from ICC: " + PAN);
+	if(compare_PAN(ICC_PK_Recovered.substring(4, 24), PAN) == -1)
+		print("* - Invalid Application PAN");
+	else
+		print("* - Application PAN validation...PASS");
+}
+
+
+//ICC Public Key Veridation에 필요한 card의 static data를 받아온다.
+function retrieve_StaticData(AFL, AIP)
+{
+	var recordRange, nStaticDataRecord;
+	var staticData = "";
+	
+	print('\n*************************************************');
+	print("* - Read static data for SDA according to AFL");	
+	print('*************************************************');
+	
+	//모든 SFI 검사
+	for(i = 0 ; i < AFL.length ; i += 8)
+	{
+		recordRange = AFL.substring(i, i + 8);
+		nStaticDataRecord = parseInt(recordRange.substring(6,8), 16);
+		
+		//현재 SFI가 Static Data를 가지고 있으면
+		if(nStaticDataRecord != 0x00)
+		{
+			SFI = parseInt(recordRange.substring(0,2), 16) >> 3;
+			startRecordNumber = parseInt(recordRange.substring(2,4), 16);
+			endRecordNumber = parseInt(recordRange.substring(4,6), 16);
+					
+			//레코드 범위가 유효한지 확인
+			if( endRecordNumber - startRecordNumber + 1 < nStaticDataRecord)
+				continue;
+			
+			//Static Data에 참여하는 모든 레코드를 순서대로 붙임
+			for(j = startRecordNumber; j < startRecordNumber + nStaticDataRecord; j++)
+			{
+				if(SFI >= 1 && SFI <= 10)
+					staticData = staticData + lookup_BER_TLV(send_ReadRecord(SFI, j), "70", RETURN_VALUE);
+				else
+					staticData = staticData + send_ReadRecord(SFI, j)
+			}
+		}
+	}
+	
+	//Static Data Tag List 검사
+	staticDataTagList = lookup_BER_TLV(send_ReadRecord(3,2), "70", RETURN_VALUE);
+	staticDataTagList = lookup_BER_TLV(staticDataTagList, "9F4A", RETURN_VALUE);
+	if(staticDataTagList != "")
+		staticData = staticData + AIP;
+	
+	return staticData;
+}
+
+
+//Signed Dynamic Application Data에서 ICC Dynamic Data를 구한다. GENERATE AC에 CDA요청후 반환값에 TC, ARQC가 반환되었을 때 사용.
+//AAC가 반환된 경우는 이 함수 사용하면 안됨. Signed Dynamic Application Data가 아니라 AAC가 반환되기 때문...
+//입력 
+//	encrypted_SDAD : 암호화 된 Signed Dynamic Application Data
+//	ICC_PK_Modulus : ICC Public Key Modulus
+//출력 : ICC Dynamic Data
+function retrieve_ICC_Dyanmic_Data_CDA(encrypted_SDAD, ICC_PK_Modulus)
+{
+	var recordData, ICC_PK_Exponent;
+	
+	print('\n*************************************************');
+	print("* - Retrieve Signed Dynamic Application Data for CDA");
+	print('*************************************************');
+	
+	//retrive ICC Public Key Exponent and decrypt Signed Dynamic Application Data
+	recordData = lookup_BER_TLV(send_ReadRecord(2,5), "70", RETURN_VALUE);
+	ICC_PK_Exponent = lookup_BER_TLV(recordData, "9F47", RETURN_VALUE);
+	decrypted_SDAD = decRSAwithPublicKey(encrypted_SDAD ,ICC_PK_Modulus , ICC_PK_Exponent);
+	print("* - Encrypted Signed Application Data : " + encrypted_SDAD);
+	print("* - Decrypted Signed Application Data : " + decrypted_SDAD);
+	
+	validate_SDAD_CDA(decrypted_SDAD);
+	
+	ICC_Dynamic_Data_Length = parseInt(decrypted_SDAD.substring(6,8), 16);
+	print("* - ICC Dynamic Data");
+	print("* - Len " + ICC_Dynamic_Data_Length);
+	print("* - Value " + decrypted_SDAD.substring(8, 8 + ICC_Dynamic_Data_Length * 2));
+	
+	return decrypted_SDAD.substring(8, 8 + ICC_Dynamic_Data_Length * 2);
+}
+
+function validate_SDAD_forDDA(decrypted_SDAD)
+{
+	var msg1, msg2, hash, hashResult;
+		
+	print('\n*************************************************');
+	print("* - validate Signed Dynamic Application Data");
+	print('*************************************************');
+	
+	//Recovered Data Header, Signed Data Formate 검사
+	print('\n*************************************************');
+	print("* - validate Recovered Data Header and Signed Data Format");
+	print('*************************************************');
+	if(decrypted_SDAD.substring(0,2) != "6A")
+		print("Invalid Recovered Data Header");
+	else
+		print("* - Recovered Data Validation...PASS");
+	if(decrypted_SDAD.substring(2,4) != "05")
+		print("* - Invalid Signed Data Format");
+	else
+		print("* - Signed Data Format Format Validation...PASS");
+	if(decrypted_SDAD.substring(decrypted_SDAD.length -2 ) != "BC")
+		print("* - Invalid Recovered Data Tailer");
+	else
+		print("* - Recovered Data Tailer Validation...PASS");
+		
+	//Decrypted Signed Dynamic Application Data의 Hash Result 검사
+	print('\n**********************************************************************');
+	print("\n* - validate Hash Result in decrypted Signed Dynamic Application Data");
+	print('************************************************************************');
+	msg1 = decrypted_SDAD.substring(2, decrypted_SDAD.length - 42);
+	msg2 = DDOL_Data;
+	print("* - Data to be hashed : " + msg1 + msg2);	
+	hash = messageDigest_SHA1(msg1 + msg2).toUpperCase();
+	hashResult = decrypted_SDAD.substring(decrypted_SDAD.length - 42, decrypted_SDAD.length - 2); 
+	print("* - Calculated Hash : " + hash);
+	print("* - Hash Result : " + hashResult); 
+	if(hash != hashResult)
+		print("* - Invalid Hash Result");
+	else 
+		print("* - Hash Result Validation...PASS");
+	print('************************************************************************');
+}
+
+
+function validate_SDAD_forfDDA(encrypted_SDAD)
+{
+	var msg1, msg2, hash, hashResult;
+		
+	var issuer_PK_Modulus = retrieve_Issuer_PK_Modulus(CA_PK_Modulus, CA_PK_Exponent);
+	print("\n*****************************************************");
+	print("Issuer Public Key Modulus : " + issuer_PK_Modulus);
+	print("*******************************************************");
+	var ICC_PK_Modulus = retrieve_ICC_PK_Modulus(issuer_PK_Modulus);
+	print("\n*****************************************************");
+	print("ICC Public Key Modulus : " + ICC_PK_Modulus);
+	print("*******************************************************");
+	
+	print('\n*************************************************');
+	print("* - Retrieve Signed Dynamic Application Data for DDA");
+	print('*************************************************');
+
+	
+	//retrive ICC Public Key Exponent and decrypt Signed Dynamic Application Data
+	var recordData = lookup_BER_TLV(send_ReadRecord(2,5), "70", RETURN_VALUE);
+	ICC_PK_Exponent = lookup_BER_TLV(recordData, "9F47", RETURN_VALUE);
+	decrypted_SDAD = decRSAwithPublicKey(encrypted_SDAD ,ICC_PK_Modulus , ICC_PK_Exponent);
+	print("* - Encrypted Signed Application Data : " + encrypted_SDAD);
+	print("* - Decrypted Signed Application Data : " + decrypted_SDAD);
+	
+	print('\n*************************************************');
+	print("* - validate Signed Dynamic Application Data");
+	print('*************************************************');
+	
+	//Recovered Data Header, Signed Data Formate 검사
+	print('\n*************************************************');
+	print("* - validate Recovered Data Header and Signed Data Format");
+	print('*************************************************');
+	if(decrypted_SDAD.substring(0,2) != "6A")
+		print("Invalid Recovered Data Header");
+	else
+		print("* - Recovered Data Validation...PASS");
+	if(decrypted_SDAD.substring(2,4) != "05")
+		print("* - Invalid Signed Data Format");
+	else
+		print("* - Signed Data Format Format Validation...PASS");
+	if(decrypted_SDAD.substring(decrypted_SDAD.length -2 ) != "BC")
+		print("* - Invalid Recovered Data Tailer");
+	else
+		print("* - Recovered Data Tailer Validation...PASS");
+		
+	//Decrypted Signed Dynamic Application Data의 Hash Result 검사
+	print('\n**********************************************************************');
+	print("\n* - validate Hash Result in decrypted Signed Dynamic Application Data");
+	print('************************************************************************');
+	msg1 = decrypted_SDAD.substring(2, decrypted_SDAD.length - 42);
+	msg2 = Unpredictable_Number + Amount_Authorised + Transaction_Currency_Code + Card_Authentication_Related_Data;
+	print("* - Data to be hashed : " + msg1 + msg2);	
+	hash = messageDigest_SHA1(msg1 + msg2).toUpperCase();
+	hashResult = decrypted_SDAD.substring(decrypted_SDAD.length - 42, decrypted_SDAD.length - 2); 
+	print("* - Calculated Hash : " + hash);
+	print("* - Hash Result : " + hashResult); 
+	if(hash != hashResult)
+		print("* - Invalid Hash Result");
+	else 
+		print("* - Hash Result Validation...PASS");
+	print('************************************************************************');
+}
+
+
+//Signed Dynamic Application Data를 검증한다.
+function validate_SDAD_CDA(decrypted_SDAD)
+{
+	var msg1, msg2, hash, hashResult, ICC_Dynamic_Data ;
+	
+	print('\n*************************************************');
+	print("* - validate Signed Dynamic Application Data");
+	print('*************************************************');
+	
+	//Recovered Data Header, Signed Data Formate 검사
+	print('\n*************************************************');
+	print("* - validate Recovered Data Header and Signed Data Format");
+	print('*************************************************');
+	if(decrypted_SDAD.substring(0,2) != "6A")
+		print("Invalid Recovered Data Header");
+	else
+		print("* - Recovered Data Validation...PASS");
+	if(decrypted_SDAD.substring(2,4) != "05")
+		print("* - Invalid Signed Data Format");
+	else
+		print("* - Signed Data Format Format Validation...PASS");
+	
+	//ICC Dynamic Data내의 CID가 GENERATE AC Response의 CID와 일치하는지 검사
+	print('\n*************************************************');
+	print("* - validate CID in ICC Dynamic data");
+	print('*************************************************');
+	var CID = lookup_BER_TLV(GEN_AC_Response, "77", RETURN_VALUE);
+	CID = lookup_BER_TLV(CID, "9F27", RETURN_VALUE); 
+	var ICC_Dynamic_Data_Length = parseInt(decrypted_SDAD.substring(6,8), 16);
+	ICC_Dynamic_Data = decrypted_SDAD.substring(8, 8 + ICC_Dynamic_Data_Length * 2);
+	var CID_ICC_Dynamic_Data = ICC_Dynamic_Data.substring(ICC_Dynamic_Data.length - 58, ICC_Dynamic_Data.length - 56);
+	print("* - CID : " + CID);
+	print("* - CID in ICC Dynamic Data : " + CID_ICC_Dynamic_Data);
+	if(CID != CID_ICC_Dynamic_Data)
+		print("* - Invalid CID");
+	else
+		print("* - CID Validation...PASS");
+		
+	//Decrypted Signed Dynamic Application Data의 Hash Result 검사
+	print('\n*************************************************');
+	print("\n* - validate Hash Result in decrypted Signed Dynamic Application Data");
+	print('*************************************************');
+	msg1 = decrypted_SDAD.substring(2, decrypted_SDAD.length - 42);
+	msg2 = GEN_AC_Sequence == GEN_AC_1 ? CDOL1_Data.substring(50, 58) : CDOL2_Data.substring(54, 62);	
+	print("* - Data to be hashed : " + msg1 + msg2);	
+	hash = messageDigest_SHA1(msg1 + msg2).toUpperCase();
+	hashResult = decrypted_SDAD.substring(decrypted_SDAD.length - 42, decrypted_SDAD.length - 2); 
+	print("* - Calculated Hash : " + hash);
+	print("* - Hash Result : " + hashResult); 
+	if(hash != hashResult)
+		print("* - Invalid Hash Result");
+	else 
+		print("* - Hash Result Validation...PASS");
+		
+	//Transaction Data Hash Code 검사
+	print('\n************************************************');
+	print("* - Validate Transaction Data Hash Code");
+	print('*************************************************');
+	//build Transaction Data Hash Code source
+	msg1 = GEN_AC_Sequence == GEN_AC_1 ?  CDOL1_Data : CDOL1_Data + CDOL2_Data;
+	msg1 = lookup_BER_TLV(PDOL_Data, "83", RETURN_VALUE) + msg1;
+	var value_77 = lookup_BER_TLV(GEN_AC_Response, "77", RETURN_VALUE);
+	msg1 = msg1 + "9F27" + lookup_BER_TLV(value_77, "9F27", RETURN_LENGTH) + lookup_BER_TLV(value_77, "9F27", RETURN_VALUE)
+							+ "9F36" + lookup_BER_TLV(value_77, "9F36", RETURN_LENGTH) + lookup_BER_TLV(value_77, "9F36", RETURN_VALUE) 
+							+ "9F10" + lookup_BER_TLV(value_77, "9F10", RETURN_LENGTH) + lookup_BER_TLV(value_77, "9F10", RETURN_VALUE);
+		
+	print("* - Data to be hashed : " + msg1);	
+	hash =  messageDigest_SHA1(msg1).toUpperCase();
+	var tran_Hash_Code = ICC_Dynamic_Data.substring(ICC_Dynamic_Data.length - 40); 
+	print("* - Calculated Hash : " + hash);
+	print("* - Transaction Data Hash Code : " + tran_Hash_Code); 	
+	if(hash != tran_Hash_Code)
+		print("* - Invalid Transaction Data Hash Code");
+	else 
+		print("* - Transaction Data Hash Code Validation...PASS");
+}
+
+
+function parse_IAD(data)
+{
+	print('\n*************************************************');
+	print("* Tag 9F10 Issuer Application Data");
+	print('*************************************************');
+	print("*	- Len " + toHex(data.length / 2));
+	
+	print("* Length Indicator");
+	print("*	- Len 01" );
+	print("*	- Value " + data.substring(0,2));
+
+	print("* Derivation Key Index");
+	print("*	- Len 01" );
+	print("*	- Value " + data.substring(2,4));
+		
+	print("* Cryptogram Version Number");
+	print("*	- Len 01");
+	print("*	- Value " + data.substring(4,6));
+	
+	parse_CVR(data.substring(6, 14));	
+		
+	print("* 계산법표식");
+	print("*	- Len 01" );
+	print("*	- Value " + data.substring(14,16));
+	
+	if(data.length > 16)
+	{
+		print("* Issuer discretionary data");
+		print("*	- Len " + toHex((data.length - 16) / 2));
+		print("*	- Value " + data.substring(16));
+	}
+	
+	//assign values
+	LI = data.substring(0,2);
+	DKI = data.substring(2,4);
+	CVN = data.substring(4,6);
+	CM = data.substring(14,16);
+	IDD = data.substring(16);
+	
+}
+
+function parse_CVR(data)
+{
+	  print('\n*************************************************');
+		print("* Card Verification Results(CVR)");
+		print('*************************************************');
+		print("*	- Len 04" );
+		print("*	- Value " + data);
+		
+		var CVR_Byte_2 = parseInt(data.substring(2,4),16); 
+		var CVR_Byte_3 = parseInt(data.substring(4,6),16);
+		var CVR_Byte_4 = parseInt(data.substring(6,8),16);
+		
+		if( (CVR_Byte_2 & BIT_MASK_8) == 0x00 & (CVR_Byte_2 & BIT_MASK_7) == 0x00)
+			print("* Byte 2 Bit 8-7 ACC returned in second GENERATE AC");
+		else if( (CVR_Byte_2 & BIT_MASK_8) == 0x00 & (CVR_Byte_2 & BIT_MASK_7) == BIT_MASK_7)
+			print("* Byte 2 Bit 8-7 TC returned in second GENERATE AC");
+		else if( (CVR_Byte_2 & BIT_MASK_8) == BIT_MASK_8 & (CVR_Byte_2 & BIT_MASK_7) == 0x00)
+			print("* Byte 2 Bit 8-7 Second GENERATE AC not requested");
+		if( (CVR_Byte_2 & BIT_MASK_6) == 0x00 & (CVR_Byte_2 & BIT_MASK_5) == 0x00)
+			print("* Byte 2 Bit 6-5 AAC returned in first GENERATE AC");
+		else if( (CVR_Byte_2 & BIT_MASK_6) == 0x00 & (CVR_Byte_2 & BIT_MASK_5) == BIT_MASK_5)
+			print("* Byte 2 Bit 6-5 TC returned in first GENERATE AC");
+		else if( (CVR_Byte_2 & BIT_MASK_6) == BIT_MASK_6 & (CVR_Byte_2 & BIT_MASK_5) == 0x00)
+			print("* Byte 2 Bit 6-5 ARQC returned in first GENERATE AC");
+		else if( (CVR_Byte_2 & BIT_MASK_6) == BIT_MASK_6 & (CVR_Byte_2 & BIT_MASK_5) == BIT_MASK_5)
+			print("* Byte 2 Bit 6-5 AAR returned in first GENERATE AC");
+		if( (CVR_Byte_2 & BIT_MASK_4) == BIT_MASK_4)
+			print("* Byte 2 Bit 4 Issuer Authentication performed and failed");
+		if( (CVR_Byte_2 & BIT_MASK_3) == BIT_MASK_3)
+			print("* Byte 2 Bit 3 Offline PIN performed");
+		if( (CVR_Byte_2 & BIT_MASK_2) == BIT_MASK_2)
+			print("* Byte 2 Bit 2 Offline PIN verification");
+		if( (CVR_Byte_2 & BIT_MASK_1) == BIT_MASK_1)
+			print("* Byte 2 Bit 1 Unable to go online");
+		
+		if( (CVR_Byte_3 & BIT_MASK_8) == BIT_MASK_8)
+			print("* Byte 3 Bit 8 Last online transaction not completed");
+		if( (CVR_Byte_3 & BIT_MASK_7) == BIT_MASK_7)
+			print("* Byte 3 Bit 7 PIN Try Limit exceeded");
+		if( (CVR_Byte_3 & BIT_MASK_6) == BIT_MASK_6)
+			print("* Byte 3 Bit 6 Exceeded velocity checking counters");
+		if( (CVR_Byte_3 & BIT_MASK_5) == BIT_MASK_5)
+			print("* Byte 3 Bit 5 New card");
+		if( (CVR_Byte_3 & BIT_MASK_4) == BIT_MASK_4)
+			print("* Byte 3 Bit 4 Issuer Authentication failure on last online transaction");
+		if( (CVR_Byte_3 & BIT_MASK_3) == BIT_MASK_3)
+			print("* Byte 3 Bit 3 Issuer Authentication not performed after online authorization");
+		if( (CVR_Byte_3 & BIT_MASK_2) == BIT_MASK_2)
+			print("* Byte 3 Bit 2 Application blocked by card because PIN Try Limit exceeded");
+		if( (CVR_Byte_3 & BIT_MASK_1) == BIT_MASK_1)
+			print("* Byte 3 Bit 1 Offline static data authentication failed on last transaction and transaction declined offline");
+
+
+		print("* Byte 4 Bit 8-5 Number of Issuer Script Commands received after the second GENERATE AC command");
+		print("* 								containing secure messaging processed on last transaction : " + toHex(CVR_Byte_4 & 0xE0));
+		if( (CVR_Byte_4 & BIT_MASK_4) == BIT_MASK_4)
+			print("* Byte 4 Bit 4 Issuer Scripting processing failed on last transaction");
+		if( (CVR_Byte_4 & BIT_MASK_3) == BIT_MASK_3)
+			print("* Byte 4 Bit 3 Offline dynamic data authentication failed on last transaction and transaction declined offline");
+		if( (CVR_Byte_4 & BIT_MASK_2) == BIT_MASK_2)
+			print("* Byte 4 Bit 2 Offline dynamic data authentication performed");
+			
+		//assign Values
+		CVR = data;
+
+}
+
+
+//데이터 내에 tag가 존재하면 tag, length, value중 하나의 index 반환
+//이 함수는 data에 BER-TLV구조가 들어온다고 가정한다.
+//data : BER-TLV구조의 데이터
+//tag : 찾고자 하는 테그
+//kindOfReturn : 반환값의 종류를 설정한다. 해당 tag의 length, value중 하나를 반환한다.
+//							: RETURN_LENGTH : BER-TLV의 length 반환
+//							: RETURN_VALUE : BER-TLV의 value 반환
+//
+//출력
+//kinOfReturn == RETURN_LENGTH : BER-TLV의 length 반환
+//kinOfReturn == RETURN_VALUE : BER-TLV의 value 반환
+function lookup_BER_TLV(data, tag, kindOfReturn)
+{
+	var currentData = data;
+	var currentTag;
+	var currentLength;
+	var nLength;
+
+	while(currentData.length > 0)
+	{
+		currentTag = get_CurrentTag(currentData, RETURN_VALUE);
+		currentLength = get_CurrentLength( currentData.substring(currentTag.length, currentData.length), 	RETURN_VALUE);
+		nLength = get_CurrentLength(currentData.substring(currentTag.length, currentData.length), RETURN_LENGTH);
+		
+		if(tag == currentTag)
+		{
+			if(kindOfReturn == RETURN_LENGTH)
+				return toHex(currentLength/2);
+			else
+				return currentData.substring(currentTag.length + nLength, currentTag.length + nLength + currentLength); 
+		}
+		else
+		{
+			currentData = skip_Current_BER_TLV(currentData);
+		}
+	}
+	
+	return "";
+	
+}
+
+
+function lookup_BER_TL(data, tag, kindOfReturn)
+{
+	var currentData = data;
+	var currentTag;
+	var currentLength;
+	var nLength;
+
+	while(currentData.length > 0)
+	{
+		currentTag = get_CurrentTag(currentData, RETURN_VALUE);
+		currentLength = get_CurrentLength( currentData.substring(currentTag.length, currentData.length), 	RETURN_VALUE);
+		nLength = get_CurrentLength(currentData.substring(currentTag.length, currentData.length), RETURN_LENGTH);
+		
+		if(tag == currentTag)
+		{
+			if(kindOfReturn == RETURN_LENGTH)
+				return toHex(currentLength/2);
+			else
+				return currentData.substring(currentTag.length + nLength, currentTag.length + nLength + currentLength); 
+		}
+		else
+		{
+			currentData = skip_Current_BER_TL(currentData);
+		}
+	}
+	
+	return "";
+	
+}
+
+//data의 가장 앞부분 tag를 반환한다.
+//이 함수는 data가 BER-TLV구조임을 가정한다.
+//data : BER-TLV구조를 가지는 데이터
+//kinOfReturn : 반환되는 값의 종류
+//							: RETURN_LENGTH : tag의 길이를 반환
+//							: RETURN_VALUE : tag의 값을 반환
+//
+//출력
+//kinOfReturn == RETURN_LENGTH : tag의 길이 반환
+//kinOfReturn == RETURN_VALUE : tag의 값 반환
+function get_CurrentTag(data, kindOfReturn)
+{
+	var currentTag = data.substring(0, 2);
+		
+	//tag가 2바이트로 이루어져 있으면....
+	if((parseInt(currentTag, 16) & 0x1F ) == 0x1F)
+			currentTag = data.substring(0, 4);
+			
+	return kindOfReturn == RETURN_VALUE ? currentTag : currentTag.length;
+}
+
+
+//data의 가장 앞부분의 length를 반환한다.
+//이 함수는 data의 가장 앞부분이 length임을 가정한다.
+//
+//입력
+//data : length가 가장 앞부분에 위치한 데이터
+//kinOfReturn : 반환되는 값의 종류
+//							: RETURN_LENGTH : length의 길이를 반환
+//							: RETURN_VALUE : length의 값을 반환
+//
+//출력
+//kinOfReturn == RETURN_LENGTH : length의 길이 반환, length가 7F가 넘어갈 경우 포함되는 Length Indicator까지 포함되는 길이.
+//kinOfReturn == RETURN_VALUE : length의 값 반환, length가 7F가 넘어가더라도 실제 길이를 나타내는 바이트만 반환.
+function get_CurrentLength(data, kindOfReturn)
+{
+	var currentLength = parseInt(data.substring(0, 2), 16);
+	var nByte_Length = 0;
+	//length가 7F가 넘으면, length가 2바이트 이상으로 구성되어 있으면
+	if((currentLength & TLV_LengthIndicator) == TLV_LengthIndicator)
+	{
+		nByte_Length = currentLength & TLV_LengthByteMask;
+		currentLength = parseInt(data.substring(2, 2 + (nByte_Length * 2)), 16);
+	}
+	
+	return kindOfReturn == RETURN_VALUE ? currentLength * 2 : nByte_Length * 2 + 2;
+}
+
+//현재의 BER-TLV를 스킵한다.
+//이 함수는 data가 BER-TLV구조를 가진다고 가정한다.
+//
+//입력
+//data : BER-TLV 구조를 가진 데이터
+//
+//출력 : 하나의 BER-TLV구조가 스킵된 BER-TLV구조를 가진 데이터 
+function skip_Current_BER_TLV(data)
+{
+	var nextTagIndex = 0;
+	var tagLength = get_CurrentTag(data, RETURN_LENGTH);
+	var nLength = get_CurrentLength( data.substring(tagLength, data.length), RETURN_LENGTH);
+	var length = get_CurrentLength( data.substring(tagLength, data.length), RETURN_VALUE);
+	nextTagIndex = tagLength + nLength + length;
+	
+	return data.substring(nextTagIndex, data.length);
+}
+
+
+function skip_Current_BER_TL(data)
+{
+	var nextTagIndex = 0;
+	var tagLength = get_CurrentTag(data, RETURN_LENGTH);
+	var nLength = get_CurrentLength( data.substring(tagLength, data.length), RETURN_LENGTH);
+	var length = get_CurrentLength( data.substring(tagLength, data.length), RETURN_VALUE);
+	nextTagIndex = tagLength + nLength;
+	
+	return data.substring(nextTagIndex, data.length);
+}
+
+
+//PAN 문자열 비교
+//출력
+//0 : 동일
+//-1 : 틀림
+function compare_PAN(str1, str2)
+{
+	if(str1.length > str2.length)
+	{
+		var tmp = str1;
+		str1 = str2;
+		str2 = tmp;
+	}
+	
+	for(i = 0 ; i < str1.length ; i++)
+		if(str1[i] != 'F' && str2[i] != 'F' && str1[i] != str2[i])
+			return -1;
+	
+	return 0;
+}
+					/* Check The Log Entry does not contain an entry consistent with 
+The Application File Locator, SFI N records 1 through X */
+function check_LogEntry() {
+	
+	var AFL_SFI;
+	var AFL_StartRecNum;
+	var AFL_LastRecNum;
+	var AFL_TEMP = AFL;
+	
+	while(AFL_TEMP.length > 0) {
+		AFL_SFI = parseInt(AFL_TEMP.substring(0,2), 16) >> 3;
+		AFL_StartRecNum = parseInt(AFL_TEMP.substring(2,4), 16);
+		AFL_LastRecNum = parseInt(AFL_TEMP.substring(4,6), 16);
+		
+		if(Log_SFI === AFL_SFI) {
+			for(i = AFL_StartRecNum; i < AFL_LastRecNum; i++) {
+				for(j = 1; j < Log_RecNum; j++) {
+					if(i == j)  {
+						error("* Check Log Entry......FAIL");
+					}
+				}
+			}
+		}
+		AFL_TEMP = AFL_TEMP.substring(8);
+	}
+	print("\n* Check Log Entry......PASS");
+}
+
+function BIT_MASK(src, off, BIT_MASK){
+	off = (off - 1) * 2;
+	tp = parseInt(src.substr(off, 2), 16);
+	tp |= BIT_MASK;
+	tp =  toHex(tp);
+	src = src.substring(0, off) + tp + src.substring(off + 2, src.length);
+	Terminal_Transaction_Qualifiers = src;
+	//return src;
+}
+
+function Read_Record(){
+	for(i = 0 ; i < AFL.length ; i += 8)
+	{
+		recordRange = AFL.substring(i, i + 8);
+		SFI = parseInt(recordRange.substring(0,2), 16) >> 3;
+		startRecordNumber = parseInt(recordRange.substring(2,4), 16);
+		endRecordNumber = parseInt(recordRange.substring(4,6), 16);
+	
+		print("READ RECORD");
+		for(j = startRecordNumber; j <= endRecordNumber; j++)
+		{
+			print("SFI : " + SFI + "  " + "Record Number : " + j);
+			recordData = send_ReadRecord(SFI, j);
+			assertSW("9000");
+
+			recordData = lookup_BER_TLV(recordData, "70", RETURN_VALUE);
+			Track2_Equivalent_Data = lookup_BER_TLV(recordData, "57", RETURN_VALUE);	
+		}
+	}
+}
+
+function check_TempContent(response, temp, flag, tags){
+		
+		
+		data = lookup_BER_TLV(response, temp, RETURN_VALUE);
+		var temp_len = data.length;
+		var tagArray = tags.split(","); 
+		var len = 0;
+
+		print("\n****************************************************************");
+		print("* Template Content Check");
+		print("*    Template Tag: " + temp);
+		print("*    " + flag);
+		print("*    Input Tag list:");
+	
+		for(i=0; i<tagArray.length; i++){
+			var tag = tagArray[i];
+			var value = lookup_BER_TLV(data, tag, RETURN_VALUE);
+			print("*    - Tag " + tag);
+			if(flag.substr(0, 8) == "INCLUDES" && value == "") error("The template tag '" + temp + "' should include tag '" + tag + "'.");
+			if(flag.substr(0, 8) == "EXCLUDES" && value != "") error("The template tag '" + temp + "' should not include tag '" + tag + "'.");
+
+			tag_len = (tag.length + value.length) + 2;
+			if(value.length >= 127*2) tag_len += 2;
+			len += tag_len;
+		}
+		if(flag == "INCLUDES_ONLY" && temp_len != len) error("The template tag '" + temp + "' should only include tag '" + tags + "'.");//길이로 temp가 tags만 포함하는 지 확인
+		print("* PASS: Template Tag Checks");
+		print("****************************************************************");
+	
+}
+
+function dCVV(offset){
+
+	print("\n*---------------------------------------------------------------");
+	print("* dCVV Validation");
+	print("*---------------------------------------------------------------");
+
+	var dCVV = Track2_Equivalent_Data.substr(parseInt(offset, 16)-1, 3);
+	var PAN_temp = Track2_Equivalent_Data.split("D");
+	var str = Track2_Equivalent_Data.substr(parseInt(offset, 16)+2, 4) + PAN_temp[0].substring(4, PAN_temp[0].length) + PAN_temp[1].substr(0, 7);
+	while(str.length < 32) str = str + "0";
+
+	var DEA_Key_A = MSD_UDK.substr(0, 16);
+	var DEA_Key_B = MSD_UDK.substr(16, 16);
+
+	var Block_A = str.substr(0, 16);
+	var Block_B = str.substr(16, 16);
+
+	//var Block_G = des_cbc( "3CEC9F7E50B403E0", DEA_Key_A);
+	//des_cbc_dec 함수 추가 필요;;
+	var Block_G = des_cbc(des_ecb_dec(des_cbc(xor(Block_B,  des_cbc(Block_A, DEA_Key_A)), DEA_Key_A), DEA_Key_B), DEA_Key_A).toUpperCase();
+
+	var str1="";
+	var str2 = "";
+	for(i=0; i<Block_G.length; i++){
+		digit = Block_G.charAt(i);
+		pattern =  /[a-fA-F]/;
+		if(pattern.test(digit)) str2 = str2 + (parseInt(digit, 16) + "").substr(1,1);
+		else str1 = str1 + digit;	
+	}
+	var Block_H = str1 + str2;
+
+	print("* - MSD Offset");
+	print("*	- Len " + "1");
+	print("*	- Value	" + offset);
+	print("* - Track 2 Equivalent Data");
+	print("*	- Len " + get_ByteLength(Track2_Equivalent_Data));
+	print("*	- Value	" + Track2_Equivalent_Data);
+	print("* - Unique DEA Key A");
+	print("*	- Len " + get_ByteLength(DEA_Key_A));
+	print("*	- Value	" + DEA_Key_A);
+	print("* - Unique DEA Key B");
+	print("*	- Len " + get_ByteLength(DEA_Key_B));
+	print("*	- Value	" + DEA_Key_B);
+	print("* - Block A");
+	print("*	- Len " + get_ByteLength(Block_A));
+	print("*	- Value	" + Block_A);
+	print("* - Block B");
+	print("*	- Len " + get_ByteLength(Block_B));
+	print("*	- Value	" + Block_B);
+	print("* - Unadjusted dCVV Block");
+	print("*	- Len " + get_ByteLength(Block_G));
+	print("*	- Value	" + Block_G);
+	print("* - Adjusted dCVV Block");
+	print("*	- Len " + get_ByteLength(Block_H));
+	print("*	- Value	" + Block_H);
+	print("* - dCVV generated by card");
+	print("*	- Len " +  '2');
+	print("*	- Value " + dCVV);
+	print("* - dCVV generated by Script~!");
+	print("*	- Len " + '2');
+	print("*	- Value " + Block_H.substr(0, 3));
+
+	if(Block_H.substr(0, 3) == dCVV) print("\n*** dCVV Validation Successful ***");
+	else error("\n*** dCVV Validation Failed ***");
+
+	print("\n*---------------------------------------------------------------");
+	print("* End of  dCVV Validation");
+	print("*---------------------------------------------------------------");
+}
+
+
+
+	function validate_TransactionForContactlLess(TTQ ,CAP,CTTA,CTTAUL,OASA,CVR,ECAC,CardCVMLimit){
+	        var TTQ_BYTE1=parseInt(TTQ.substring(0,2), 16);
+		var TTQ_BYTE2=parseInt(TTQ.substring(2,4), 16);
+	
+		var CAP_BYTE1=parseInt(CAP.substring(0,2), 16);
+		var CAP_BYTE2=parseInt(CAP.substring(2,4), 16);
+		var CAP_BYTE3=parseInt(CAP.substring(4,6), 16);
+		var CAP_BYTE4=parseInt(CAP.substring(6,8), 16);
+		var lastOnlineATC;
+		var CID;
+		var CID_AAC;
+		var CID_AQRC;
+		var CID_TC;
+		var CID_EX='FF';
+		var retryRemaining;
+		var IAD='03000000';
+		var CTQ_Byte1;
+		var CTQ_Byte2;
+        
+		var CVR_Byte_2 = parseInt(IAD.substring(2,4),16); 
+		var CVR_Byte_3 = parseInt(IAD.substring(4,6),16);
+		var CVR_Byte_4 = parseInt(IAD.substring(6,8),16);
+		
+		var isACCMactched=false;
+		var  checkingOnline=false;
+		var  finishOnline=false;
+		var checkingOffline=false;
+		var finishOffline=false;
+		var CardCVMLimit; 
+		print("validate_TransactionForContactlLess");
+		//Terminal support only offline
+		if( (TTQ_BYTE1 & BIT_MASK_4) == BIT_MASK_4){
+			if(lastOnlineATC==0&&(CAP_BYTE2 & BIT_MASK_4)==BIT_MASK_4){
+				//generate AAC
+				CID=CID_AAC;
+			}
+			
+			if (retryRemaining == 0) {
+				CVR_Byte_3=CVR_Byte_3| BIT_MASK_7; //set CVR	
+				//generate AAC
+				CID_qPBOC=CID_AAC;
+			}
+			print("validate_TransactionForContactlLess");
+			if((TTQ_BYTE1&BIT_MASK_7)==BIT_MASK_7||
+				(compareBCD(ECAC,CardCVMLimit)<0&&isACCMactched)||
+				(!isACCMactched&&(CAP[CAP_BYTE2]&0x20)==0x20)){
+				if((TTQ_Byte1&BIT_MASK_2)==BIT_MASK_2&&(CAP_BYTE3&BIT_MASK_5)==BIT_MASK_5){
+					//set 7th bit of fist byte of CTQ to 1
+					CTQ_Byte1|=BIT_MASK_7;
+					//7.7.5
+					print("checkingOffline")
+					checkingOffline=true;
+				}else{
+					//7.7.16 terminate transaction
+					CID=CID_EX;
+					print("7.7.16 terminate transaction")
+					print("return 6985");
+				}
+				
+			}else{
+				print("checkingOffline")
+			        checkingOffline=true;
+			}
+		}else{
+			//7.7.3 CVM requirement
+			if((TTQ_Byte2&BIT_MASK_7)!=BIT_MASK_7){
+				//
+				if((compareBCD(ECAC,CardCVMLimit)>=0&&isACCMactched)||
+					(!isACCMactched&&(CAP_BYTE3&BIT_MASK_6)==BIT_MASK_6)){
+				//7.7.4	
+					checkingOnline=true;
+				}
+			}
+			
+			if((TTQ_Byte2&BIT_MASK_7)==BIT_MASK_7||((TTQ_Byte2&BIT_MASK_7)!=BIT_MASK_7&&compareBCD(ECAC,CardCVMLimit)>=0&&isACCMactched)||
+					((TTQ_Byte2&BIT_MASK_7)!=BIT_MASK_7&&!isACCMactched&&(CAP_BYTE3&BIT_MASK_7)!=BIT_MASK_7)){
+				var terminateTransaction=true;
+	/*			if((isACCMactched&&(CAP[CAP_BYTE_3]&0x80)==(byte)0x80)||
+						(!isACCMactched&&(CAP[CAP_BYTE_3]&0x40)==(byte)0x40)){
+					if((TTQ_Byte1&0x02)==(byte)0x02&&(CAP[CAP_BYTE_3]&0x10)==(byte)0x10){
+						terminateTransaction=false;
+						//7.7.4
+						checkingOnline=true;
+					}						
+					
+				}*/
+				if((TTQ_Byte1&BIT_MASK_3)==BIT_MASK_3&&((isACCMactched&&(CAP_BYTE3&BIT_MASK_8)==BIT_MASK_8)||
+				(!isACCMactched&&(CAP_BYTE3&BIT_MASK_7)==BIT_MASK_7))){
+					//set 8th bit of fist byte of CTQ to 1
+					CTQ_Byte1|=BIT_MASK_8;
+					terminateTransaction=false;
+					//7.7.15
+					finishOnline=true;
+					CID_qPBOC=CID_ARQC;;
+				}else{
+					if((TTQ_Byte1&BIT_MASK_2)==BIT_MASK_2&&(CAP_BYTE3&BIT_MASK_5)==BIT_MASK_5){
+						terminateTransaction=false;
+						//7.7.4
+						checkingOnline=true;
+					}					
+				}
+				if( terminateTransaction)
+					//7.7.16 terminate transaction
+					CID=CID_EX;
+				
+			}
+		}
+		
+		
+		//7.7.4
+		if(checkingOnline==true){
+			if((TTQ_Byte2&BIT_MASK_8)==BIT_MASK_8){
+				//7.7.15
+				finishOnline=true;
+				CID_qPBOC=CID_ARQC;
+			}else{
+				if(!isACCMactched){
+					if((CAP_BYTE1&BIT_MASK_3)!=BIT_MASK_3)
+					finishOnline=true;
+					CID_qPBOC=CID_ARQC;
+				}else{
+					if((CAP_BYTE1&BIT_MASK_5)==BIT_MASK_5){
+						if(lastOnlineATC==0){
+							finishOnline=true;
+							CID_qPBOC=CID_ARQC;
+						}
+						
+					}else{
+						if((CAP_BYTE1&BIT_MASK_4)==BIT_MASK_4){
+							if (retryRemaianing == 0) {
+								CVR_Byte_3=CVR_Byte_3| BIT_MASK_7; //set CVR 	
+								//generate AAC
+								finishOnline=true;
+								CID_qPBOC=CID_ARQC;
+							}
+							
+						}else{
+							checkingOffline=true;
+							CID_qPBOC=CID_TC;
+						}
+					}
+						
+				}
+				
+			}
+		}
+		
+		//7.7.5
+		if(checkingOffline==true){
+			if(!isACCMactched){
+				//7.7.13
+				if(CTCI >= CTLI){
+					if((TTQ_Byte1&BIT_MASK_4)==BIT_MASK_4){
+						//7.7.17	
+						CID_qPBOC=CID_AAC;
+					
+					}else{
+						//7.7.15
+						finishOnline=true;
+						CID_qPBOC=CID_ARQC;
+					}
+				}else{
+					isRecoeryNeeded=true;
+					CTCI++;
+					finishOffline=true;
+					CID_qPBOC=CID_TC;
+				}
+				//7.7.14
+				finishOffline=true;
+				CID_qPBOC=CID_TC;
+			}else{
+				//7.7.6
+				if((CAP_BYTE1&BIT_MASK_8)==BIT_MASK_8){
+					
+					//7.7.10
+					//only offline
+					if((CAP_BYTE1&BIT_MASK_4)==BIT_MASK_4){
+					
+						if(compareBCD(ECAC,ECB)>=0||compareBCD(ECAC,ECBSTL)>=0){
+							subBCD(ECB,ECAC,ECB);
+							if((CAP_BYTE1&BIT_MASK_1)==BIT_MASK_1)
+							retractBCD(ECB,0,AOSA,0);
+							isRecoeryNeeded=true;
+							//7.7.14
+							finishOffline=true;
+							CID_qPBOC=CID_TC;
+							
+						}else{
+							if((CAP_BYTE1&BIT_MASK_1)==BIT_MASK_1)
+								retractBCD(ECB,0,AOSA,0);
+							//7.7.17
+							CID_qPBOC=CID_AAC;
+						}
+						
+					}else{
+						subBCD(ECB,ECRT,tmpBCDBuffer1);
+						if(compareBCD(ECAC,tmpBCDBuffer1)>=0||compareBCD(ECAC,ECBSTL)>=0){
+							subBCD(ECB,ECAC,ECB);
+							if((CAP_BYTE1&BIT_MASK_1)==BIT_MASK_1)
+								retractBCD(ECB,0,AOSA,0);
+							isRecoeryNeeded=true;
+						}else{
+							if((CAP_BYTE1&BIT_MASK_1)==BIT_MASK_1)
+								retractBCD(ECB,0,AOSA,0);
+							//7.7.15
+							finishOnline=true;
+							CID_qPBOC=CID_ARQC;
+						}
+						
+					}
+				}else{
+					//7.7.7
+					if((CAP_BYTE1&BIT_MASK_7)==BIT_MASK_7){
+						if(CTTAUL!=null){
+							subBCD(CTTAL,CTTA,tmpBCDBuffer1);
+						}else{
+							subBCD(CTTAUL,CTTA,tmpBCDBuffer1);
+						}
+						//7.7.11
+						//only offline
+						if((CAP_BYTE1&BIT_MASK_4)==BIT_MASK_4){
+							
+							if(compareBCD(ECAC,tmpBCDBuffer1)>=0||compareBCD(ECAC,ECB)>=0||compareBCD(ECAC,ECBSTL)>=0){
+								subBCD(ECB,ECAC,ECB);
+								addBCD(CTTA,ECAC,CTTA);
+								if((CAP_BYTE1&BIT_MASK_1)==BIT_MASK_1){
+									if(CTTAUL!=null){
+										subBCD(CTTAL,CTTA,tmpBCDBuffer1);
+									}else{
+										subBCD(CTTAUL,CTTA,tmpBCDBuffer1);
+									}
+									retractBCD(tmpBCDBuffer1,0,AOSA,0);
+								}
+								isRecoeryNeeded=true;
+								//7.7.14
+								finishOffline=true;
+								CID_qPBOC=CID_TC;
+								
+							}else{
+								if((CAP_BYTE1&BIT_MASK_1)==BIT_MASK_1){
+									if(CTTAUL!=null){
+										subBCD(CTTAL,CTTA,tmpBCDBuffer1);
+									}else{
+										subBCD(CTTAUL,CTTA,tmpBCDBuffer1);
+									}
+									retractBCD(tmpBCDBuffer1,0,AOSA,0);
+								}
+								//7.7.17
+								CID_qPBOC=CID_AAC;
+							}
+							
+						}else{
+							subBCD(ECB,ECRT,tmpBCDBuffer2);
+							if(compareBCD(ECAC,tmpBCDBuffer1)>=0||compareBCD(ECAC,tmpBCDBuffer2)>=0||compareBCD(ECAC,ECBSTL)>=0){
+								subBCD(ECB,ECAC,ECB);
+								addBCD(CTTA,ECAC,CTTA);
+								if((CAP_BYTE1&BIT_MASK_1)==BIT_MASK_1){
+									if(CTTAUL!=null){
+										subBCD(CTTAL,CTTA,tmpBCDBuffer1);
+									}else{
+										subBCD(CTTAUL,CTTA,tmpBCDBuffer1);
+									}
+									retractBCD(tmpBCDBuffer1,0,AOSA,0);
+								}
+								isRecoeryNeeded=true;
+							}else{
+								if((CAP_BYTE1&BIT_MASK_1)==BIT_MASK_1){
+									if(CTTAUL!=null){
+										subBCD(CTTAL,CTTA,tmpBCDBuffer1);
+									}else{
+										subBCD(CTTAUL,CTTA,tmpBCDBuffer1);
+									}
+									retractBCD(tmpBCDBuffer1,0,AOSA,0);
+								}
+								//7.7.15
+								finishOnline=true;
+								CID_qPBOC=CID_ARQC;
+							}
+							
+						}
+					}else{
+						//7.7.8
+						
+						if(CTTAUL!=null){
+							subBCD(CTTAL,CTTA,tmpBCDBuffer1);
+						}else{
+							subBCD(CTTAUL,CTTA,tmpBCDBuffer1);
+						}
+						if((CAP_BYTE1&BIT_MASK_6)==BIT_MASK_6){
+							//only offline
+							if((CAP_BYTE1&BIT_MASK_4)==BIT_MASK_4){
+								
+								if(!(compareBCD(ECAC,ECBSTL)>=0&&!(compareBCD(ECAC,ECB)>=0&&compareBCD(ECAC,tmpBCDBuffer1)>=0))){
+								
+									
+									subBCD(ECB,ECAC,ECB);
+									addBCD(CTTA,ECAC,CTTA);
+									if((CAP_BYTE1&BIT_MASK_1)==BIT_MASK_1){
+										if(CTTAUL!=null){
+											subBCD(CTTAL,CTTA,tmpBCDBuffer1);
+										}else{
+											subBCD(CTTAUL,CTTA,tmpBCDBuffer1);
+										}
+										retractBCD(tmpBCDBuffer1,0,AOSA,0);
+									}
+									isRecoeryNeeded=true;
+									//7.7.14
+									finishOffline=true;
+									CID_qPBOC=CID_TC;
+									
+								}else{
+									if((CAP_BYTE1&BIT_MASK_1)==BIT_MASK_1){
+										if(CTTAUL!=null){
+											subBCD(CTTAL,CTTA,tmpBCDBuffer1);
+										}else{
+											subBCD(CTTAUL,CTTA,tmpBCDBuffer1);
+										}
+										retractBCD(tmpBCDBuffer1,0,AOSA,0);
+									}
+									//7.7.17
+									CID_qPBOC=CID_AAC;
+								}
+								
+							}else{
+								
+								if(!(compareBCD(ECAC,ECBSTL)>=0&&!(compareBCD(ECAC,ECB)>=0&&compareBCD(ECAC,tmpBCDBuffer1)>=0))){
+								
+									if(compareBCD(ECAC,ECB)>=0){
+										subBCD(ECB,ECAC,ECB);
+									}else{
+										addBCD(CTTA,ECAC,CTTA);
+									}
+									if((CAP_BYTE1&BIT_MASK_1)==BIT_MASK_1){
+										if(CTTAUL!=null){
+											subBCD(CTTAL,CTTA,tmpBCDBuffer1);
+											addBCD(tmpBCDBuffer1,ECB,tmpBCDBuffer1);
+											
+										}else{
+											subBCD(CTTAUL,CTTA,tmpBCDBuffer1);
+											addBCD(tmpBCDBuffer1,ECB,tmpBCDBuffer1);
+										}
+										retractBCD(tmpBCDBuffer1,0,AOSA,0);
+									}
+									isRecoeryNeeded=true;
+									//7.7.14
+									finishOffline=true;
+									CID_qPBOC=CID_TC;
+								}else{
+									if(CTTAUL!=null){
+										subBCD(CTTAL,CTTA,tmpBCDBuffer1);
+										addBCD(tmpBCDBuffer1,ECB,tmpBCDBuffer1);
+										
+									}else{
+										subBCD(CTTAUL,CTTA,tmpBCDBuffer1);
+										addBCD(tmpBCDBuffer1,ECB,tmpBCDBuffer1);
+									}
+									retractBCD(tmpBCDBuffer1,0,AOSA,0);
+									//7.7.15
+									finishOnline=true;
+									CID_qPBOC=CID_ARQC;
+									
+								}
+								
+							}
+							
+							
+						}else{
+							//7.7.9
+							if((TTQ_Byte1&BIT_MASK_8)==BIT_MASK_8){
+								//7.17
+								CID_qPBOC=CID_AAC;
+							}else{
+								//7.7.15
+								finishOnline=true;
+								CID_qPBOC=CID_ARQC;
+							}
+							
+							
+						}
+					}
+				}
+			}
+		}
+		
+		
+		if(finishOffline=true){
+			print('finishOffline');
+			//generateAC_fDDA(apdu,CID_qPBOC,AOSA);
+		//online	
+		}else if(finishOnline=true){
+		        print('finishOnline');
+			if((CAP_BYTE1&BIT_MASK_2)==BIT_MASK_2){ 
+				//7.7.16 terminate transaction
+				ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
+			}else{
+				if(compareBCD(ECAC,ZERO)==0){
+					//AAC
+					//generateAC_fDDA(apdu,CID_qPBOC,AOSA);
+				}
+				if((CAP_BYTE2&BIT_MASK_7)==BIT_MASK_7){ 
+					
+					if(CTTAUL!=null){
+						subBCD(CTTAL,CTTA,tmpBCDBuffer1);
+					}else{
+						subBCD(CTTAUL,CTTA,tmpBCDBuffer1);
+					}
+					if(compareBCD(ECAC,ECB)>=0||compareBCD(ECAC,tmpBCDBuffer1)>=0){
+						subBCD(ECB,ECAC,ECB);
+						addBCD(CTTA,ECAC,CTTA);
+						if(CTTAUL!=null){
+							subBCD(CTTAL,CTTA,tmpBCDBuffer1);
+							
+							
+						}else{
+							subBCD(CTTAUL,CTTA,tmpBCDBuffer1);
+							
+						}
+						retractBCD(tmpBCDBuffer1,0,AOSA,0);
+						
+					}else{
+						//AAC
+						//generateAC_fDDA(apdu,CID_qPBOC,AOSA);
+					}
+					
+				}
+				
+				if((CAP_BYTE2&BIT_MASK_8)==BIT_MASK_8){ 
+					
+					if(compareBCD(ECAC,ECB)>=0){
+						subBCD(ECB,ECAC,ECB);							
+						retractBCD(ECB,0,AOSA,0);
+						
+					}else{
+						//AAC
+						//generateAC_fDDA(apdu,CID_qPBOC,AOSA);
+					}
+				}
+				
+				//generate AC and setting CVR
+				//generateAC_fDDA(apdu,CID_qPBOC,AOSA);
+				
+			}
+		}else{
+		print('AAC');
+			//AAC
+			//generateAC_fDDA(apdu,CID_qPBOC,AOSA);
+		}
+		
+		
+	}
+	
+	function addBCD(Src1,Src2,Sum){
+		sum='';
+		var addtionalBit=0;
+		var bitBCD1;
+		var bitBCD2;
+		var bitSum;
+		for(var i=11;i>=0;i--){
+		    bitBCD1=parseInt(Src1.substring(i,(i+1)), 16);
+		    bitBCD2=parseInt(Src2.substring(i,(i+1)), 16);
+		    bitsum=bitBCD1+bitBCD2+addtionalBit;
+		    print(bitsum);
+		    if(bitsum>9){
+		    	addtionalBit=1;
+		    	bitsum=bitsum-10;
+		    }else{
+		        addtionalBit=0;
+		    }
+		    sum=bitsum+sum;
+		    
+		}
+		print(sum);
+		
+	}
+	
+	function subBCD(Src1,Src2,Sum){
+		sum='';
+		var addtionalBit=0;
+		var bitBCD1;
+		var bitBCD2;
+		var bitSum;
+		for(var i=11;i>=0;i--){
+		    bitBCD1=parseInt(Src1.substring(i,(i+1)), 16);
+		    bitBCD2=parseInt(Src2.substring(i,(i+1)), 16);
+		   
+		    
+		    bitsum=bitBCD1-bitBCD2-addtionalBit;
+		    
+		      //print(bitSum);
+		    if(bitsum<0){
+		    	addtionalBit=1;
+		    	bitsum=bitsum+10;
+		    }else{
+		        addtionalBit=0;
+		    }
+		    
+		    sum=bitsum+sum;
+		    
+		    
+		}
+		print(sum);
+		
+	}
+	
+		function compareBCD(Src1,Src2){
+		
+		var result = 0;
+		var index=0;
+
+		
+		while (index < 12) {
+			if(Src1[index]==Src2[index]){
+				result=0;
+			}else if(Src1[index]>Src2[index]){
+				return -1;
+			}else{
+				return 1;
+			}
+			  index++;
+		}
+		return result;
+		
+		
+        }

@@ -1,0 +1,52 @@
+include("..//_COMMON//_IMAGE_COMMON.js");
+
+///////////////////////////////////////////////
+//											///
+// 1. The number of image					///
+//											///
+// 2. DC, EC, qPBOC or Extended				///
+//	  (APP_DC_LEVEL, APP_EC_LEVEL,			///
+//	   APP_qPBOC_LEVEL, APP_EXTENDED_LEVEL)	///
+//											///
+// 3. Single Currncy or Dual Currency		///
+//	  (SINGLE_CURRENCY or DUAL_CURRENCY)	///
+//											///
+///////////////////////////////////////////////
+img_num = 5;
+app_level = APP_DC_LEVEL;
+currency = SINGLE_CURRENCY;		
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+
+var app_level_string; 
+if (app_level == 1) app_level_string = 'DC'
+else if (app_level == 2) app_level_string = 'EC'
+else if (app_level == 3) app_level_string = 'qPBOC'
+else if (app_level == 4) app_level_string = 'EXTENDED'
+
+print('\n*****************************************************');
+print('* Perso Start - Image ' + img_num + ' & ' + app_level_string + ' & ' + currency);
+print('*****************************************************');
+
+APP_PREFERRED_NAME = '4341524420494D4147452030303035';
+AIP_DC = '7C00';
+ADA = '8240';
+ISSUER_AUTH_INDICATOR = '80';
+LCOL = '0F';
+UCOL = '0F';
+CONSECUTIVE_TRANSACTION_LIMIT_INTERNATIONAL_CURRENCY = '0F' // 9F53
+CUMULATIVE_TOTAL_TRANSACTION_AMOUNT_LIMIT = '000099999999'; // 9F54
+CUMULATIVE_TOTAL_TRANSACTION_AMOUNT_LIMIT_DUAL = '000000015000'; // 9F75
+CONSECUTIVE_TRANSACTION_LIMIT_INTERNATIONAL_COUNTRY = '0F'; // 9F72
+SECOND_APP_CURRENCY_CODE = '0826'; // 9F76
+CONVERSION_FACTOR = '20000175';
+issuer_key = CRYPTO_RSA_1984;
+ic_key = CRYPTO_RSA_1984;
+
+init_crypto();
+init_image(DUAL);
+store_data(app_level, currency);
+
+print('\n*****************************************************');
+print('* Perso Start - Image ' + img_num + ' & ' + app_level_string + ' & ' + currency);
+print('*****************************************************');

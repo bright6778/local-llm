@@ -1,0 +1,12 @@
+print("\n\n\n*********************************************");
+print("* PBOC Test Batch PUT");
+print("*********************************************");
+
+if (isStaticCard)
+	include(INIT_E2P_PATH);
+
+//perso_process(1, APP_DC_LEVEL, SINGLE_CURRENCY);
+
+//include("..\\PBOC-PUT-061.js");
+//include("..\\PBOC-PUT-081.js");
+include("..\\PBOC-PUT-082.js");

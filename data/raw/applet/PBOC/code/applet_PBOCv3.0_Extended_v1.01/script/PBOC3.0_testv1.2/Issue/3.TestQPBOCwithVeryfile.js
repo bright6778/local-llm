@@ -1,0 +1,23 @@
+include("FunctionCheckAFL.js");
+reset();
+
+//image1~15
+//include("pboc_samplecard_01.js");
+select('325041592E5359532E4444463031');
+select_PBOC();
+var  res = send_GPO();
+
+
+checking_AFL_related_record(AFL);
+
+var data = lookup_BER_TLV(res, "77", RETURN_VALUE);
+var DSAD  = lookup_BER_TLV(data, "9F4B", RETURN_VALUE);
+
+
+var plaintext = decRSAwithPublicKey(DSAD,'9DD730669F27892944A68C0C62344C0E8EC57C2AA78004B014C26A0B0F3B517A0B60D355DFBC8929BBC59CEBCD0CCA13CDAA0C94E91C84A26E7DBE6B58595C4EFF2D717CB9EB965C15D287AF60AC28D06BC51282BC4A518B0EA3ABA9343F1778545FFB49EE840BBCEA457DBAABBFD755BA0F943A08A59CFFB6066B4084767599','010001');
+print(plaintext);
+//include("pboc_samplecard_02.js");
+//checking_AFL_related_record(AFL_DC_9104);
+
+//do_SDA_Auth(1024);
+

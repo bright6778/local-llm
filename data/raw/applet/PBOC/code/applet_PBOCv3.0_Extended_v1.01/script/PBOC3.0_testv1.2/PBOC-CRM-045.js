@@ -1,0 +1,18 @@
+include("_PBOC_COMMON.js");
+
+print('\n* Test Case : CRM045');
+reset();
+select_PBOC();
+assertSW('9000');
+send_GPO(TEST_PDOL_DATA);
+assertSW('9000');
+send_Verify('80', TEST_PLAIN_PIN);
+assertSW('9000');
+var first_ATC = send_GEN_AC_1(ARQC, TEST_CDOL1).substring(6,10);
+assertSW('9000');
+send_ExternalAuth();
+assertSW('9000');
+var second_ATC = send_GEN_AC_2(AAC, TEST_CDOL2).substring(6,10);
+assertSW('9000');
+
+assertEquals(first_ATC, second_ATC);

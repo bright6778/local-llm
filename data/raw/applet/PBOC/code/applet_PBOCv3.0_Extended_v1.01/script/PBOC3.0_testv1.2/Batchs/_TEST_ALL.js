@@ -1,0 +1,251 @@
+/////////////////////
+//* PBOC All Test *//
+/////////////////////
+
+include("_TEST_CONF.js");
+	
+include("\\Images\\PERSO_SCRIPT.js");
+
+//if (interfaceToggle) {
+	
+	//////////////////////////////////
+	//  CT(DC,EC) TEST - Total 608  //
+	//////////////////////////////////
+	init(CT_PORT, CT_READER);
+	
+
+	
+	////////////////////////////////////
+	//* VSDC 1.4.0 Test Plan v1.6 Bk 1 *//
+	//////////////////////////////////////
+	
+	//Application Block Command: 4
+include("PBOC-BATCH-ABK.js");
+	
+//PBOC Not Supported!!
+//include("PBOC-BATCH-ABL.js")
+
+//Application Blocking: 12 / +1(PBOC 3.0)
+include("PBOC-BATCH-ABS.js");
+
+//Read Other Application Data: 22
+include("PBOC-BATCH-APD.js");
+
+//Get Other Application Data: 15
+include("PBOC-BATCH-APG.js"); 
+
+//Application Selection: 11
+include("PBOC-BATCH-APP.js");
+
+//Application Unblock Command: 4
+include("PBOC-BATCH-AUK.js");
+
+//Application Unblocking: 9 / +1(PBOC 3.0)
+include("PBOC-BATCH-AUS.js");
+
+//Card Block Command: 4
+include("PBOC-BATCH-CBK.js");
+
+//Card Blocking: 8 / +2(PBOC 3.0) - Test it separately!!
+if (isCardBlockTest) include("PBOC-BATCH-CBS.js");	
+
+//Common Commands or Utility Procedures: 2
+include("PBOC-BATCH-CLN.js");
+
+//Combined DDA / GEN AC: 12
+if (isDDA) include("PBOC-BATCH-COM.js");
+	
+//Issuer Script Failed on Previous Transaction: 5 / +1(PBOC 3.0)
+include("PBOC-BATCH-CRA.js");
+
+//Card Risk Management: 48
+include("PBOC-BATCH-CRM.js");
+
+//Completion Velocity Checking for Transaction Amount(Dual Currency / Upper Limit): 4
+include("PBOC-BATCH-CVD.js");
+
+//Completion Velocity Checking for Transaction Amount (Upper Limit) : 4
+include("PBOC-BATCH-CVL.js");
+
+//Payment System Environment Directory: 9
+include("PBOC-BATCH-DIR.js");
+
+//DDA Failure on Last Transaction: 18
+if (isDDA) include("PBOC-BATCH-DLO.js");
+
+//Update Card Data: 10 / +1(PBOC 3.0)
+include("PBOC-BATCH-DUS.js");
+
+//External Authenticate Command: 2
+include("PBOC-BATCH-EAU.js");
+
+//Issuer Authentication Failure on Last Online Transaction: 18
+include("PBOC-BATCH-FLO.js");
+
+//////////////////////////////////////
+//  VSDC 1.4.0 Test Plan v1.6 Bk 2  //
+//////////////////////////////////////
+
+//Failure To Online Authorize Transaction: 25
+include("PBOC-BATCH-FON.js");
+
+//GET DATA Command: 1
+include("PBOC-BATCH-GET.js");
+
+//GET PROCESSING OPTIONS Command: 4
+include("PBOC-BATCH-GPO.js");
+
+//Issuer Authentication: 11
+include("PBOC-BATCH-IAU.js");
+
+//Issuer Decretionary Data: 6
+if (isDDA)	include("PBOC-BATCH-IDD.js");
+
+
+//Application Initialization: 8
+include("PBOC-BATCH-INI.js");
+
+
+//Issuer Script Processing: 55 / +1(PBOC 3.0)
+include("PBOC-BATCH-ISL.js");
+
+//Transaction Log Files: 12 
+include("PBOC-BATCH-LOG.js");
+
+//New Card: 42
+include("PBOC-BATCH-NEW.js");
+
+//Offline Transaction: 5
+include("PBOC-BATCH-OFA.js");
+
+//////////////////////////////////////
+//  VSDC 1.4.0 Test Plan v1.6 Bk 3  //
+//////////////////////////////////////
+
+//Online Completion: 15
+include("PBOC-BATCH-ONA.js");
+
+//Online Authorization Not Completed: 18
+include("PBOC-BATCH-ONO.js");
+
+//PIN Change/Unblock Command: 12
+include("PBOC-BATCH-PCU.js");
+
+//Cardholder Verification: 10
+include("PBOC-BATCH-PIN.js");
+
+//Put Data on The Consecutive Transaction Limit(International): 3
+include("PBOC-BATCH-PLI.js");
+
+//Payment System Environment: 10
+include("PBOC-BATCH-PSE.js");
+
+//Put Data Command: 3
+include("PBOC-BATCH-PUT.js");
+
+//Read Record Command: 1
+include("PBOC-BATCH-RED.js");
+
+//SDA: 7
+include("PBOC-BATCH-SDA.js"); 
+
+//Select Application Command: 4
+include("PBOC-BATCH-SEL.js");
+
+//SDA Failure on Last Transaction: 43
+include("PBOC-BATCH-SLO.js");
+ 
+//Update Record Command: 3
+include("PBOC-BATCH-UPR.js");
+
+//Velocity Checking for Transaction Amount(Dual Currency): 14
+//include("PBOC-BATCH-VDC.js");
+
+//Velocity Checking for Total Consecutive International Trancation: 3
+include("PBOC-BATCH-VIC.js");
+
+//Velocity Checking for Transaction in The Designed Currency: 4
+include("PBOC-BATCH-VLC.js");
+
+//Velocity Checking for Total Consecutive Offline International Transaction: 4
+include("PBOC-BATCH-VLI.js");
+
+//Velocity Checking for Total Consecutive Offline Transaction: 20
+include("PBOC-BATCH-VLT.js");
+
+//Verify Command: 2
+include("PBOC-BATCH-VRY.js");
+
+///////////////
+//  EC Test  //
+///////////////
+
+//EC Test(including dual currency): 35
+include("PBOC-BATCH-EC.js"); // E - 2
+
+// Chinese Algorithm - SM234
+//if(isSM){
+//	include('../SM234/_TEST_ALL_SM234_CT.js');
+//}
+//
+// else {
+
+//////////////////////////////////
+//  CL(qPBOC) TEST - Total 123  //
+//////////////////////////////////
+
+//init(CL_PORT, CL_READER);
+//
+////////////////////////////////////////
+////* VCPS 2.0.2 Test Plan v2.0 Bk 1 *//
+////////////////////////////////////////
+//
+//REQUIREMENTS FOR PDOL CONTENT: 4
+include("qPBOC-BATCH-PDOL.js");
+
+//GET DATA: 10
+//include("qPBOC-BATCH-GET.js");
+////
+//////CONTACTLESS TRANSACTION HIERARCHY: 3
+////include("qPBOC-BATCH-CTH.js");
+////
+//////Card GPO Command Processing: 13
+include("qPBOC-BATCH-GPO.js");
+////
+//////CARD RISK MANAGEMENT PROCESSING: 17
+////include("qPBOC-BATCH-CRM.js"); // E - 1
+//
+////LOW VALUE CHECK: 9
+//include("qPBOC-BATCH-LVC.js");
+//
+////LOW VALUE AND CTTA CHECK: 8
+//include("qPBOC-BATCH-LVCandCTTA.js");
+//
+////LOW VALUE OR CTTA CHECK: 8
+//include("qPBOC-BATCH-LVCorCTTA.js");
+//
+////PREPAID FOR LOW VALUE AND CTTA CHECK: 10
+//include("qPBOC-BATCH-LVCandCTTAprepaid.js");
+//
+////PREPAID FOR LOW VALUE CHECK: 2
+//include("qPBOC-BATCH-LVCprepaid.js");
+//
+////FDDA FUNCTIONALITY COMPLETE OFFLINE TRANSACTION: 4
+//include("qPBOC-BATCH-FDDA.js");
+//
+////NON-MATCHING CURRENCY OFFLINE: 7
+//include("qPBOC-BATCH-NMCO.js");
+//
+////PBOC Common CL Test: 28
+////include("CommonCL-BATCH-ALL.js");
+///**/
+//if (isExtended){
+//		include("qPBOC-BATCH_EXTENDED_PREAUTH.js");
+//		if (isCUP2013) include("qPBOC-BATCH_EXTENDED_PREAUTH_SA.js");
+//}
+//
+//// Chinese Algorithm - SM234
+//if(isSM){
+//	include('../SM234/_TEST_ALL_SM234_CL.js');
+//}
+//}

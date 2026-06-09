@@ -1,15 +1,39 @@
-# Setup executables (too large for git)
+# ── 可执行文件 / 安装包（体积过大）──────────────────────────
 *.exe
 *.msi
 *.dmg
 *.pkg
 
-# Claude Code local settings (machine-specific)
-.claude/settings.local.json
+# ── 运行时生成（不入库）──────────────────────────────────────
+# Chroma 向量库：运行 ingest 脚本后自动生成，不需要入库
+data/vectordb/
 
-# OS
+# Java Card 编译产物：二进制 CAP 文件，不做 RAG，不需要入库
+*.cap
+
+# 压缩包（测试脚本 zip、镜像包等）
+*.zip
+
+# Python 运行时
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.env
+
+# ── IDE / 工具 ────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/
+*.iml
 
-# Logs
+# Claude Code 本地设置（机器相关，不共享）
+.claude/settings.local.json
+
+# 日志
 *.log
+
+# ── SourceSafe 残留（spec 目录下有 vssver2.scc）───────────────
+vssver2.scc

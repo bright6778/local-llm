@@ -1,0 +1,38 @@
+// 1. CT Port & Reader CHECK
+var CT_PORT = 0;
+var CT_READER = 2;
+
+// 2. CL Port & Reader CHECK
+var CL_PORT = 0;
+var CL_READER = 0;
+
+// 3. CT DDA CHECK
+var isDDA = true;
+
+// 4. CT CARD BLOCK TEST
+var isCardBlockTest = true;
+
+// 5. CL Extended CHECK
+var isExtended = true;
+
+// 5.1 CUP2013 CHECK - secondary currency supported in extended TX (valid if only isExtended is true)
+var isCUP2013 = false;
+
+// 6. Toggle DUAL or Only CL Interface in CL Test (true:DUAL / false:Only CL)
+var isDualTest = false;
+
+// 7. PBOC 3.0 SUPPORTED CHECK
+var isPBOC30 = true;
+
+// 8. STATIC CARD CHECK
+var isStaticCard = false;
+var INIT_E2P_PATH = '//STATIC_SCRIPT//KONA2S_D1016//KONA2S_D1016_v01.01_init_card.js';
+
+// 9. Toggle CT or CL TEST (true:CT / false:CL)
+var interfaceToggle = false;
+
+// 10. After PBOC3.0 Extended v1.17 (changed EC transaction)
+var isAfterv117 = false;
+
+// 11. PBOC3.0 Extended SM234 v1.23 (Chinese Algorithm)
+var isSM = false;
