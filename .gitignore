@@ -1,0 +1,15 @@
+# Setup executables (too large for git)
+*.exe
+*.msi
+*.dmg
+*.pkg
+
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
