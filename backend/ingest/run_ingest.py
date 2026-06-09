@@ -25,7 +25,7 @@ from backend.ingest.chunker import chunk_documents
 from backend.rag.embedder import embed
 from backend.rag.vectorstore import upsert, collection_count, get_client
 
-BATCH_SIZE = 32  # embed this many chunks at once
+BATCH_SIZE = 64  # embed this many chunks at once
 
 
 def _chunk_id(text: str, source: str, index: int) -> str:
@@ -56,7 +56,11 @@ def ingest(mode: str, reset: bool = False) -> None:
     chunk_size = int(os.getenv("CHUNK_SIZE", "1500"))
     chunk_overlap = int(os.getenv("CHUNK_OVERLAP", "150"))
     chunks = chunk_documents(docs, chunk_size=chunk_size, overlap=chunk_overlap)
-    print(f"[ingest] Produced {len(chunks)} chunks")
+    print(f"[ingest] Produced {len(chunks)} chunks", flush=True)
+
+    # Warm up embedding model BEFORE the tqdm loop so SSL errors surface immediately
+    from backend.rag.embedder import get_model
+    get_model()
 
     # Embed and upsert in batches
     ids, embeddings, documents, metadatas = [], [], [], []
@@ -82,7 +86,7 @@ def ingest(mode: str, reset: bool = False) -> None:
         upsert(mode, ids, batch_embeddings, documents, metadatas)
 
     total = collection_count(mode)
-    print(f"[ingest] Done. Collection '{mode}' now has {total} chunks.")
+    print(f"[ingest] Done. Collection '{mode}' now has {total} chunks.", flush=True)
 
 
 def main() -> None:
