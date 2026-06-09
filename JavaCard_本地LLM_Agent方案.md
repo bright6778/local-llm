@@ -177,8 +177,40 @@ local-llm/
 
 ---
 
-## 十、下一步待确认
+## 十、重要问题
 
-> **COS 源码和 USIM 规范（ETSI / 3GPP）是否已有电子版可入库？**
+### 1. RAG 摄入：文档分块（Chunking）是第一道鬼门关
 
-这决定后两个 agent 的 RAG 怎么搭。PBOC applet agent 可先不等这个，独立推进。
+ETSI 102 221、3GPP 31.102 以及 GlobalPlatform 规范通常是 PDF 或极其复杂的 Word 文档，充满了深层嵌套的表格、BER-TLV 的位结构定义、以及 ASN.1 语法。
+
+**雷区：** 如果使用常见的 `RecursiveCharacterTextSplitter` 按固定字数切分，一个完整的 TLV 定义表格会被切得四分五裂，检索出来的片段对 LLM 毫无意义。
+
+**对策：** 必须使用或手写基于文档结构的解析器（Semantic Chunking）：
+- 按**章节标题（Heading）**作为元数据边界
+- APDU 指令表、状态码（SW1 SW2）及其解释必须作为**完整的一个 Chunk** 存入向量数据库
+
+---
+
+### 2. 隔离与越权：专属 COS 的边界保护
+
+面对的是高度定制化的专属 COS 环境，而非开源公共系统（如标准 JCOP），底层 C 代码是核心资产。
+
+**对策：** 在构建 Vector DB 时：
+- 不仅用 Collection 区分，还要在元数据（Metadata）中打上严格的 `domain_tag`
+- 在**后端路由层强制过滤**：确保在 Applet 开发模式下，无论发生什么 Prompt 注入，都绝对无法通过相似度检索召回底层 COS 的 C 源码逻辑
+
+---
+
+### 3. “沙箱反馈循环”的闭环设计
+
+在阶段 2（接工具）时可发挥巨大威力。利用 jCardSim 形成自动化测试环（Agentic Loop）：
+
+```
+Agent 输出代码
+  → 自动包装 JUnit 测试
+  → 丢进 jCardSim 后台运行
+  → 若抛出 SystemException 或异常状态码（如 6F00）
+  → 后端截获堆栈 + APDU 历史
+  → 带报错再次请求模型：”运行失败，状态码 6F00，请反思并重写”
+  → 循环直到通过
+```
