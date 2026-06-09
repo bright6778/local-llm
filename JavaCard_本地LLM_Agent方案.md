@@ -214,3 +214,147 @@ Agent 输出代码
   → 带报错再次请求模型：”运行失败，状态码 6F00，请反思并重写”
   → 循环直到通过
 ```
+
+---
+
+## 十一、当前部署状态与运维说明
+
+> 记录截至 2026-06-09 的实际落地情况，供后续维护参考。
+
+### 11.1 已完成的工作
+
+| 项目 | 状态 | 备注 |
+|---|---|---|
+| Ollama + DeepSeek-Coder-V2-Lite-Instruct | ✅ 运行中 | `ollama pull deepseek-coder-v2:16b` |
+| FastAPI 后端 (`POST /chat`, `GET /health`) | ✅ 运行中 | `uvicorn backend.main:app --host 0.0.0.0 --port 8000` |
+| PBOC applet 知识库入库 | ✅ 完成 | 47 文件 → 4892 chunks，入 Chroma `applet` 集合 |
+| COS 知识库 | ⏳ 待填充 | `data/raw/cos/` 目录待放入资料后运行 ingest |
+| USIM 知识库 | ⏳ 待填充 | `data/raw/usim/` 目录待放入资料后运行 ingest |
+
+---
+
+### 11.2 Embedding 模型说明（重要）
+
+当前环境是 Intel Iris Xe 集成显卡，**无 NVIDIA GPU / CUDA**，因此：
+
+| 模型 | 速度（CPU） | 质量 | 当前使用 |
+|---|---|---|---|
+| `BAAI/bge-m3` | ~6 小时 / 4892 chunks | ⭐⭐⭐ 多语言，最佳 | ❌ 太慢 |
+| `BAAI/bge-small-en-v1.5` | ~14 分钟 / 4892 chunks | ⭐⭐ 英文，够用 | ✅ 当前 |
+
+**切换回 bge-m3 的条件：** 有 NVIDIA GPU 且安装了 CUDA 版 PyTorch。
+
+切换步骤：
+```bash
+# 1. 修改 .env
+EMBED_MODEL=BAAI/bge-m3
+
+# 2. 安装 CUDA PyTorch（示例：CUDA 12.1）
+pip install torch --index-url https://download.pytorch.org/whl/cu121
+
+# 3. 重新 ingest（必须 --reset，旧向量维度不兼容）
+python -m backend.ingest.run_ingest --mode applet --reset
+python -m backend.ingest.run_ingest --mode cos --reset
+python -m backend.ingest.run_ingest --mode usim --reset
+```
+
+> ⚠️ bge-m3 向量维度为 1024，bge-small-en-v1.5 为 384，**两者不能混用**。切换模型后必须 `--reset` 重建集合。
+
+---
+
+### 11.3 企业网络 SSL 绕过
+
+公司网络有 SSL 中间检查代理，直接访问 HuggingFace 会报证书错误。解决方案已内置：
+
+`.env` 中设置：
+```
+HF_HUB_DISABLE_SSL=1
+```
+
+`backend/rag/embedder.py` 中的 `_patch_ssl_if_needed()` 会：
+1. 关闭 Python `ssl` 模块的证书验证
+2. Monkey-patch `httpx.Client.__init__` 强制 `verify=False`（huggingface_hub 底层用 httpx）
+3. 清空 `CURL_CA_BUNDLE` / `REQUESTS_CA_BUNDLE` / `SSL_CERT_FILE`
+
+**模型下载到本地缓存后**（`~/.cache/huggingface/`），可将 `HF_HUB_DISABLE_SSL=1` 改为 `0`。
+
+---
+
+### 11.4 将 FastAPI 服务注册为 Windows 服务
+
+服务器重启后需要自动启动，推荐用 **NSSM**（Non-Sucking Service Manager）：
+
+```powershell
+# 下载 nssm：https://nssm.cc/download
+# 注册服务（以下为示例路径，按实际调整）
+nssm install LocalLLMAgent "C:\Python314\python.exe" "-m uvicorn backend.main:app --host 0.0.0.0 --port 8000"
+nssm set LocalLLMAgent AppDirectory "D:\Github\local-llm"
+nssm set LocalLLMAgent AppEnvironmentExtra "PYTHONPATH=D:\Github\local-llm"
+nssm start LocalLLMAgent
+```
+
+---
+
+### 11.5 新增 COS / USIM 知识库
+
+```
+# 把 COS 源码和 ISO 7816 文档放进：
+data/raw/cos/
+
+# 把 ETSI 102.221、3GPP 31.102 放进：
+data/raw/usim/
+
+# 然后分别 ingest
+python -m backend.ingest.run_ingest --mode cos
+python -m backend.ingest.run_ingest --mode usim
+```
+
+ingest 完成后，`/health` 接口的 `collection_counts` 会显示三个集合都有数据，三个 agent 就全部可用。
+
+---
+
+### 11.6 接口调用示例
+
+**健康检查：**
+```powershell
+Invoke-RestMethod -Uri http://localhost:8000/health
+```
+
+**PBOC applet 问答：**
+```powershell
+Invoke-RestMethod -Uri http://localhost:8000/chat -Method POST `
+  -ContentType "application/json" `
+  -Body '{"mode":"applet","query":"PBOC GPO command processing flow"}'
+```
+
+**返回结构：**
+```json
+{
+  "mode": "applet",
+  "answer": "...",
+  "sources": [
+    {"source": "data/raw/applet/PBOC/spec/...", "score": 0.72},
+    ...
+  ]
+}
+```
+
+---
+
+### 11.7 vLLM 迁移（需要时）
+
+当出现以下情况时考虑从 Ollama 切换到 vLLM：
+- 多人同时使用，Ollama 串行等待明显
+- 需要更低 token 延迟
+- 需要 continuous batching 压满 GPU
+
+**切换成本极低**，只需改 `.env` 中的一行：
+```bash
+# 从 Ollama
+OLLAMA_BASE_URL=http://localhost:11434/v1
+
+# 改为 vLLM
+OLLAMA_BASE_URL=http://localhost:8001/v1
+```
+
+代码层面 `backend/llm/client.py` 无需任何修改。
